@@ -1,0 +1,120 @@
+﻿@using ExpressCart.Utility
+@model IEnumerable<OrderHeader>
+
+@{
+	var status = Context.Request.Query["status"];
+}
+
+<style>
+	.text-primary {
+		color: #007bff; /* Blue text color */
+	}
+
+	.active {
+		background-color: blue;
+	}
+
+		.active a {
+			color: white; /* White text color */
+		}
+</style>
+
+<div class="container">
+	<div class="row pt-4 pb-3">
+		<div class="col-6">
+			<h2 class="text-primary">Order List</h2>
+		</div>
+	</div>
+
+	<div class="card-body p-4">
+		<div class="d-flex justify-content-between pb-5 pt-2">
+			<span></span>
+			@if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
+			{
+				<div style="margin-right:260px">
+					@await Html.PartialAsync("_OrderSearchBar")
+				</div>
+			}
+			<ul class="list-group list-group-horizontal-sm">
+				<li class="list-group-item @(status == "inprocess" ? "active" : "")">
+					<a style="text-decoration:none;" asp-controller="Order" asp-action="Index" asp-route-status="inprocess">Processing</a>
+				</li>
+				<li class="list-group-item @(status == "pending" ? "active" : "")">
+					<a style="text-decoration:none;" asp-controller="Order" asp-action="Index" asp-route-status="pending">Payment Pending</a>
+				</li>
+				<li class="list-group-item @(status == "completed" ? "active" : "")">
+					<a style="text-decoration:none;" asp-controller="Order" asp-action="Index" asp-route-status="completed">Shipped</a>
+				</li>
+				<li class="list-group-item @(status == "approved" ? "active" : "")">
+					<a style="text-decoration:none;" asp-controller="Order" asp-action="Index" asp-route-status="approved">Approved</a>
+				</li>
+				<li class="list-group-item @(status == "all" ? "active" : "")">
+					<a style="text-decoration:none;" asp-controller="Order" asp-action="Index" asp-route-status="all">All</a>
+				</li>
+			</ul>
+		</div>
+
+		<table id="tblData" class="table table-bordered table-striped" style="width:100%">
+			<thead>
+				<tr>
+					<th>OrderNo</th>
+					<th>Name</th>
+					<th>Phone Number</th>
+					<th>Email</th>
+					<th>Status</th>
+					<th>Total</th>
+					<th>Date</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				@if (Model != null && Model.Any())
+				{
+					// Sort the Model by OrderDate in descending order
+					var sortedOrders = Model.OrderByDescending(order => order.OrderDate);
+					foreach (var orderHeader in sortedOrders)
+					{
+						<tr>
+							<td>@orderHeader.OrderNo</td>
+							<td>@orderHeader.Name</td>
+							<td>@orderHeader.PhoneNumber</td>
+							<td>@(orderHeader.ApplicationUser?.Email ?? "N/A")</td>
+							<td>@orderHeader.OrderStatus</td>
+							<td>@orderHeader.OrderTotal</td>
+							<td>@orderHeader.OrderDate</td>
+							<td>
+								<a href="/admin/order/details?orderId=@orderHeader.Id" class="btn btn-primary mx-2">
+									<i class="bi bi-pencil-square"></i>
+								</a>
+							</td>
+						</tr>
+					}
+				}
+				else
+				{
+					<tr>
+						<td colspan="7" class="text-center">No Data!</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+		var buttons = document.querySelectorAll(".list-group-item");
+
+		buttons.forEach(function (button) {
+			button.addEventListener("click", function () {
+				// Remove active class from all buttons
+				buttons.forEach(function (btn) {
+					btn.classList.remove("active");
+				});
+
+				// Add active class to the clicked button
+				this.classList.add("active");
+			});
+		});
+	});
+</script>

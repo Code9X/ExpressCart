@@ -1,0 +1,55 @@
+﻿@model SubCategoryVM
+
+<div class="card shadow border-0 my-4">
+	<div class="card-header bg-secondary bg-gradient ml-0 py-3">
+		<div class="row">
+			<div class="col-12 text-center">
+				<h2 class="text-white py-2">@(Model.SubCategory.Id != 0 ? "Update " : "Create ") Sub-Category</h2>
+			</div>
+		</div>
+	</div>
+	<div class="card-body p-4">
+		<form method="post" class="row" enctype="multipart/form-data">
+			<input asp-for="SubCategory.Id" hidden />
+			<div class="row">
+
+				<div class="col-10">
+					<div class="border p-3">
+						<div class="form-floating py-1 col-12">
+							<input asp-for="SubCategory.Name" class="form-control border-0 shadow" />
+							<label asp-for="SubCategory.Name" class="ms-2"></label>
+							<span asp-validation-for="SubCategory.Name" class="text-danger"></span>
+						</div>
+						<div class="form-floating py-1 col-12">
+							<select asp-for="SubCategory.CategoryID" asp-items="@Model.CategoryList" class="form-select border-0 shadow">
+								<option disabled selected>--Select Category--</option>
+							</select>
+							<label asp-for="SubCategory.CategoryID" class="ms-2">Category</label>
+							<span asp-validation-for="SubCategory.CategoryID" class="text-danger"></span>
+						</div>
+						<div class="form-floating py-1 col-12">
+							<input asp-for="SubCategory.DisplayOrder" class="form-control border-0 shadow" />
+							<label asp-for="SubCategory.DisplayOrder" class="ms-2"></label>
+							<span asp-validation-for="SubCategory.DisplayOrder" class="text-danger"></span>
+						</div>
+						<div class="row pt-2">
+							<div class="col-6 col-md-3">
+									@if (Model.SubCategory.Id != 0)
+									{
+										<button type="submit" class="btn btn-secondary form-control">Update</button>
+									}
+									else
+									{
+										<button type="submit" class="btn btn-secondary form-control">Create</button>
+									}
+							</div>
+							<div class="col-6 col-md-3">
+								<a asp-controller="SubCategory" asp-action="Index" class="btn btn-outline-primary border form-control">Back to List</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>

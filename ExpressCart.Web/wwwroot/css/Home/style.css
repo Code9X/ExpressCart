@@ -1,0 +1,92 @@
+﻿.container {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    flex: 1;
+    padding: 0px;
+}
+
+.section {
+    flex-grow: 1;
+    padding: 10px;
+}
+
+.category-section {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.category-card {
+    text-align: center;
+    margin: 0 10px;
+}
+
+    .category-card img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+
+    .category-card p {
+        margin-top: 5px;
+    }
+
+.category-section {
+    background-color: transparent;
+}
+
+.product-card-img {
+    margin-left:60px;
+    width: 100px;
+    height: 100px; 
+    object-fit: cover;
+    text-align: center;
+    align-content:center;
+}
+.card:hover {
+    transform: translateY(-5px);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.banner-container {
+    position: relative;
+}
+
+.banner-slides {
+    display: flex;
+    transition: transform 0.5s ease;
+}
+
+.banner-slide {
+    flex: 0 0 auto;
+    width: 100%;
+}
+
+    .banner-slide img {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+    }
+
+.prev,
+.next {
+    position: absolute;
+    top: 50%; 
+    transform: translateY(-50%);
+    background-color: white;
+    padding: 10px;
+    margin:10px;
+    cursor: pointer;
+    z-index: 1; 
+}
+
+.prev {
+    left: 0px;
+}
+
+.next {
+    right:0px;
+}

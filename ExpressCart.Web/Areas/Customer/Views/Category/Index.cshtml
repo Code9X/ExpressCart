@@ -1,0 +1,110 @@
+﻿@model Tuple<ProductVM, CategoryVM>
+
+<div class="col-6 text-end">
+    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-danger" style="margin-left:1050px; white-space: nowrap;">Back To Home</a>
+</div>
+
+@foreach (var subcategory in Model.Item2.SubCategoryList)
+{
+    var subcategoryId = subcategory.Value.ToString();
+    var subcategoryName = subcategory.Text.ToString();
+
+    <h3>@subcategoryName</h3>
+
+    var productCount = 0;
+
+    <div class="product-group">
+        <div class="row pb-3">
+            @foreach (var product in Model.Item1.ProductList)
+            {
+                var text = product.Text.Split('-');
+                var productName = text[0];
+                var companyName = text[1];
+                var values = product.Value.Split(':');
+                var productId = values[0];
+                var price = values[1];
+
+                if (values[2] == subcategoryId)
+                {
+                    var productImages = Model.Item1.ProductImages.FirstOrDefault(img => img.ProductId.ToString() == productId);
+
+                    <div class="col-lg-3 col-sm-6 product-item @(productCount >= 8 ? "hidden" : "")" data-subcategory-id="@subcategoryId">
+                        <a style="text-decoration: none; background-color: transparent" asp-action="Details" asp-route-productId="@productId">
+                            <div class="row p-2">
+                                <div class="col-12 p-1">
+                                    <div class="card border-0 p-3 shadow border-top border-5 rounded">
+                                        @if (productImages != null)
+                                        {
+                                            <img class="product-card-img" src="@productImages.ImageUrl" />
+                                        }
+                                        else
+                                        {
+                                            <img class="product-card-img" src="https://placehold.co/500x600/png" />
+                                        }
+                                        <div class="card-body pb-0">
+                                            <div class="pl-1">
+                                                <p class="card-title h5 text-dark opacity-75 text-uppercase text-center">@productName</p>
+                                                <p class="text-center">@companyName</p>
+                                                <p class="h6 text-dark opacity-75 text-lowercase text-center">from ₹@price</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    productCount++;
+                }
+            }
+        </div>
+
+        @if (productCount > 8)
+        {
+            <div class="col-12 text-center" style="margin-left:500px;margin-top:-20px">
+                <button class="btn expand-btn" type="button" onclick="toggleProducts(this, '@subcategoryId')">
+                    <span>More</span> <i class="bi bi-arrow-right-square-fill"></i>
+                </button>
+            </div>
+        }
+    </div>
+}
+
+@section Scripts
+{
+    <script>
+        function toggleProducts(button, subcategoryId) {
+            var productGroup = button.closest('.product-group');
+            var buttonText = button.querySelector('span');
+            var buttonIcon = button.querySelector('i');
+
+            var allProducts = productGroup.querySelectorAll('.product-item[data-subcategory-id="' + subcategoryId + '"]');
+            var visibleProducts = productGroup.querySelectorAll('.product-item[data-subcategory-id="' + subcategoryId + '"]:not(.hidden)');
+
+            if (buttonText.innerHTML.trim() === 'More') {
+                buttonIcon.classList.remove('bi-arrow-right-square-fill');
+                buttonIcon.classList.add('bi-arrow-left-square-fill');
+                buttonText.innerHTML = 'Collapse';
+
+                allProducts.forEach(function (product) {
+                    product.classList.remove('hidden');
+                });
+            } else {
+                buttonIcon.classList.remove('bi-arrow-left-square-fill');
+                buttonIcon.classList.add('bi-arrow-right-square-fill');
+                buttonText.innerHTML = 'More';
+
+                for (var i = 8; i < allProducts.length; i++) {
+                    allProducts[i].classList.add('hidden');
+                }
+            }
+        }
+    </script>
+
+    <link href="~/css/Home/style.css" rel="stylesheet" />
+    <style>
+        .hidden {
+            display: none;
+        }
+    </style>
+}

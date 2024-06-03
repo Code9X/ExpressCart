@@ -1,0 +1,18 @@
+﻿@model dynamic
+
+<form class="d-flex" method="get" asp-controller="Order">
+
+    <div style="margin-left:20px;font-size:20px" class="input-group">
+        @if (!string.IsNullOrEmpty(ViewBag.SearchTerm))
+        {
+            <input style="width:200px" class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="searchTerm" value="@ViewBag.SearchTerm">
+        }
+        else
+        {
+            <input style="width:200px" class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="searchTerm">
+        }
+        <button class="btn" type="submit">
+            <i class="bi bi-search"></i>
+        </button>
+    </div>
+</form>

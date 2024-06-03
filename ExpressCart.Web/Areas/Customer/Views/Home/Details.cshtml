@@ -1,0 +1,192 @@
+﻿@* THIS IS THE HOME DETAILS PAGE *@
+<head>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-B1eY2v5yS2BfKz/fpTpIBzZyCJ5XcdIzWPxntXqJo3AKzJ6NkPUpJp2tEN1BzqJo" crossorigin="anonymous">
+</head>
+@model ProductVM
+
+<form method="post" id="productForm">
+	<input hidden asp-for="Product.Id" name="Product.Id" />
+	<div class="container">		
+		<div class="col-6 text-end">
+			<a asp-action="index" class="btn btn-outline-danger" style="margin-left:1050px; white-space: nowrap;">Back To Home</a>
+		</div>
+
+		<div class="row">
+			<!-- Left Section for Image Thumbnails -->
+			<div class="col-lg-6">
+				<div class="small-images-list">
+					@if (Model.ProductImages != null && Model.ProductImages.Any())
+					{
+						foreach (var image in Model.ProductImages)
+						{
+							<img class="small-image" src="@image.ImageUrl" />
+						}
+					}
+					else
+					{
+						<!-- Placeholder or default image -->
+						<img class="small-image" src="https://placehold.co/500x600/png" />
+					}
+				</div>
+			</div>
+
+			<!-- Right Section for Product Details -->
+			<div class="col-lg-6">
+				<div class="row">
+					<div class="col-lg-12">
+						<div class="large-image">
+							<!-- Large Image Display Area -->
+							@if (Model.ProductImages != null && Model.ProductImages.Any())
+							{
+								<img src="@Model.ProductImages.FirstOrDefault().ImageUrl" />
+							}
+							else
+							{
+								<img src="https://placehold.co/500x600/png" />
+							}
+						</div>
+					</div>
+					<div class="col-lg-12">
+						<div class="product-details">
+							<div>
+								<h2>@Model.Product.Name</h2>
+							</div>
+							<div>
+								<p style="color:steelblue">@Model.Product.Company.Name</p>
+							</div>
+							<div>
+								<p>Price: @Model.Product.Price.ToString("c")</p>
+							</div>
+							<div>
+								<span>Count</span>
+								<input type="number" name="Count" value="1" />
+							</div>
+							<br />
+							<div>
+								<h4>Specifications</h4>
+								<p>@Model.Product.Specifications</p>
+							</div>
+							<br />
+							<div>
+								<h4>Rating</h4>
+								<p>@Model.Product.Rating</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-12 col-md-6 pb-1">
+					<form id="addToCartForm" method="post">
+						<input type="hidden" name="actionType" value="AddToCart" />
+						<button type="submit" class="btn btn-primary btn-Cart bg-gradient  py-2 text-uppercase fw-semibold border-0">
+							<i class="fa fa-shopping-cart"></i> Add to Cart
+						</button>
+					</form>
+				</div>
+				<div class="col-12 col-md-6 pb-1">
+					<form id="buyNowForm" method="post">
+						<input type="hidden" name="actionType" value="BuyNow" />
+						<button type="submit" class="btn btn-primary btn-Buy bg-gradient  py-2 text-uppercase fw-semibold border-0">
+							<i class="fa fa-shopping-bag"></i> Buy Now
+						</button>
+					</form>
+				</div>
+			</div>
+
+		</div>
+	</div>
+</form>
+
+
+
+<style>
+	.small-images-list {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.small-image {
+		width: 50px; /* Adjust size as needed */
+		height: auto; /* Maintain aspect ratio */
+		margin-bottom: 10px; /* Add spacing between images */
+		cursor: pointer; /* Change cursor to pointer on hover for click functionality */
+	}
+
+	.large-image {
+		max-width: 400px; /* Adjust size as needed */
+		height: 400px; /* Set a fixed height for the container */
+		border: 1px solid #ccc; /* Add border for better visibility */
+		overflow: hidden; /* Hide any overflow content */
+		margin-left: -450px;
+	}
+
+		.large-image img {
+			width: 400px; /* Ensure the image fills the container */
+			height: 400px; /* Maintain aspect ratio */
+		}
+
+	.product-details {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start; /* Align items to the start of the cross axis */
+		margin-top: -400px; /* Adjust spacing between large image and details */
+		margin-left: 20px; /* Adjust spacing between large image and details */
+	}
+
+	.btn-Cart {
+		background-color: orange;
+		margin-left: 120px;
+		margin-top: 10px;
+		width: 180px;
+	}
+
+	.btn-Buy {
+		background-color: orangered;
+		margin-left: -240px;
+		margin-top: 10px;
+		width: 180px;
+	}
+
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-B1eY2v5yS2BfKz/fpTpIBzZyCJ5XcdIzWPxntXqJo3AKzJ6NkPUpJp2tEN1BzqJo" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+
+	$(document).ready(function () {
+		// Function to update large image
+		function updateLargeImage() {
+			var largeImageUrl = $(this).attr('src');
+			$('.large-image img').attr('src', largeImageUrl);
+		}
+
+		// Bind click event
+		$('.small-image').on('click', updateLargeImage);
+
+		// Bind hover event
+		$('.small-image').on('mouseenter', updateLargeImage);
+	});
+	// Function to set count value for Buy Now
+	function setCountForBuyNow() {
+		var countValue = $('input[name="Count"]').val(); // Get count value from Add to Cart form
+		$('#buyNowForm').find('input[name="actionType"]').val("BuyNow"); // Set action type to BuyNow for the Buy Now form
+		$('#buyNowForm').append('<input type="hidden" name="Count" value="' + countValue + '" />'); // Append count value to Buy Now form
+		$('#buyNowForm').submit(); // Submit Buy Now form
+	}
+
+	// Bind click event for Add to Cart
+	$('.btn-Cart').on('click', function (e) {
+		e.preventDefault();
+		$('input[name="actionType"]').val("AddToCart");
+		$('#productForm').submit();
+	});
+
+	// Bind click event for Buy Now
+	$('.btn-Buy').on('click', function (e) {
+		e.preventDefault();
+		setCountForBuyNow(); // Call function to set count value for Buy Now
+	});
+</script>
+

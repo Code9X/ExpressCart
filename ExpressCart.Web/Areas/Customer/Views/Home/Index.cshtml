@@ -1,0 +1,137 @@
+﻿@* THIS IS THE HOME VIEW *@
+@model Tuple<ProductVM, AdvertisementVM>
+
+
+<div class="container">
+
+    <div class="section category-section">
+        @foreach (var category in Model.Item1.CategoryList)
+        {
+            var values = category.Value.Split(':');
+            var id = values[0];
+            var categoryImages = Model.Item1.CategoryImages.FirstOrDefault(img => img.CategoryId.ToString() == id);
+            <div class="category-card">
+                <a asp-area="Customer" asp-controller="Category" asp-action="Index" asp-route-category="@category.Text" asp-route-categoryId="@id" style="text-decoration: none; background-color: transparent">
+                    @if (categoryImages != null)
+                    {
+                        <img class="category-card-img" src="@categoryImages.ImageUrl" />
+                    }
+                    else
+                    {
+                        <img class="category-card-img" src="https://placehold.co/200x200/png" />
+                    }
+                    <p>@category.Text</p>
+                </a>
+            </div>
+        }
+    </div>
+
+    @* banner *@
+
+    <div class="banner-section">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="banner-container">
+                    <div class="banner-slides">
+                        @foreach (var adImage in Model.Item2.AddvertisementImages)
+                        {
+                            @if (adImage != null)
+                            {
+                                <div class="banner-slide">
+                                    <img src="@adImage.ImageUrl" alt="Advertisement Image">
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="banner-slide">
+                                    <img class="product-card-img" src="https://placehold.co/700x90/png" />
+                                </div>
+                            }
+                        }
+                    </div>
+                    <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+                    <a class="next" onclick="plusSlides(1)">&#10095;</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    @* products *@
+    <div class="row pb-3">
+        @foreach (var product in Model.Item1.ProductList)
+        {
+            var text = product.Text.Split('-');
+            var productName = text[0];
+            var companyName = text[1];
+            var values = product.Value.Split(':');
+            var id = values[0];
+            var price = values[1];
+            var productImages = Model.Item1.ProductImages.FirstOrDefault(img => img.ProductId.ToString() == id);
+
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <!-- Adjusted column size -->
+                <a style="text-decoration: none; background-color: transparent" asp-action="Details" asp-route-productId="@id">
+                    <div class="row p-2">
+                        <div class="col-12 p-1">
+                            <div class="card border-0 p-3 shadow border-top border-5 rounded">
+                                @if (productImages != null)
+                                {
+                                    <img class="product-card-img" src="@productImages.ImageUrl" /> <!-- Removed border radius -->
+                                }
+                                else
+                                {
+                                    <img class="product-card-img" src="https://placehold.co/500x600/png" /> <!-- Removed border radius -->
+                                }
+
+                                <div class="card-body pb-0">
+                                    <div class="pl-1">
+                                        <p class="card-title h5 text-dark opacity-75 text-uppercase text-center">@productName</p>
+                                        <p class="text-center">@companyName</p>
+                                        <p class="h6 text-dark opacity-75 text-lowercase text-center">from ₹@price</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+
+</div>
+
+@section Scripts {
+    <link href="~/css/Home/style.css" rel="stylesheet" />
+}
+<script>
+    var slideIndex = 1;
+
+    function plusSlides(n) {
+        showSlides(slideIndex += n);
+    }
+
+    function showSlides(n) {
+        var i;
+        var slides = document.getElementsByClassName("banner-slide");
+        if (n > slides.length) { slideIndex = 1 }
+        if (n < 1) { slideIndex = slides.length }
+        for (i = 0; i < slides.length; i++) {
+            slides[i].style.display = "none";
+        }
+        slides[slideIndex - 1].style.display = "block";
+    }
+
+    function autoAdvance() {
+        plusSlides(1);
+        setTimeout(autoAdvance, 3000);
+    }
+
+    // Show the first slide when the page loads
+    showSlides(slideIndex);
+
+    // Start auto-advancing the slides
+    autoAdvance();
+</script>

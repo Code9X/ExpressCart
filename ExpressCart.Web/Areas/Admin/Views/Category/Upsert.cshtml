@@ -1,0 +1,41 @@
+﻿@model CategoryVM
+
+<div class="card shadow border-0 my-4">
+	<div class="card-header bg-secondary bg-gradient ml-0 py-3">
+		<div class="row">
+			<div class="col-12 text-center">
+				<h2 class="text-white py-2">@(Model.Category.Id != 0 ? "Update " : "Create ") Category</h2>
+			</div>
+		</div>
+	</div>
+
+	<Form method="post" enctype="multipart/form-data">
+		<input asp-for="Category.Id" hidden />
+		<div class="border p-3 mt-4">
+			<div class="mb-3 row p-1">
+				<label asp-for="Category.Name" class="p-0"></label>
+				<input asp-for="Category.Name" class="form-control" />
+				<span asp-validation-for="Category.Name" class="text-danger"></span>
+			</div>
+			<div class="mb-3 row p-1">
+				<label asp-for="Category.DisplayOrder"></label>
+				<input asp-for="Category.DisplayOrder" class="form-control" />
+				<span asp-validation-for="Category.DisplayOrder" class="text-danger"></span>
+			</div>
+			<div class="form-floating py-1 col-12">
+				<input type="file" name="files" class="form-control border-0 shadow" multiple />
+				<label asp-for="Category.CategoryImages" class="ms-2"></label>
+			</div>
+
+			<div class="row">
+				<div class="col-6 col-md-3">
+					<div class="col-12 text-center">
+						<button type="submit" class="btn btn-primary form-control">@(Model.Category.Id != 0 ? "Update " : "Create ")</button>
+					</div>
+				</div>
+				<div class="col-6 col-md-3">
+					<a asp-controller="Category" asp-action="Index" class="btn btn-secondary form-control">Back to List</a>
+				</div>
+			</div>
+		</div>
+	</Form>

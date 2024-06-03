@@ -1,0 +1,19 @@
+﻿@* THIS IS THE ORDER CONFIRMATION FROM HOME PAGE *@
+@{
+    string orderNumber = $"{DateTime.Now:yyyyMMdd}" + ViewBag.Id;
+}
+
+<div class="container row pt-4">
+    <div class="col-12 text-center">
+        <h1 class="text-primary text-center">Order Placed Successfully!</h1>
+        Your Order Number is : @orderNumber <br /><br />
+        <a href="/" class="btn btn-outline-danger" style="margin-left: 918px; margin-top: -180px;">Back to Home</a>
+        <br /><br />
+        <img src="~/images/lawn_leaf.jpg" width="65%" style="margin-top: -60px;" />
+    </div>
+    <div class="col-12  text-center" style="color:maroon">
+        <br />
+        Your Payment ID: @ViewBag.PaymentId <br />
+    </div>
+</div>
+

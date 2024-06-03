@@ -1,0 +1,88 @@
+﻿@model Tuple<RazorOrder, int>
+
+<!-- Button to trigger payment -->
+<button id="rzp-button1" hidden>Pay</button>
+
+<!-- Razorpay checkout script -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+    var options = {
+        "key": "@Html.DisplayFor(model => model.Item1.razorpayKey)",
+        "amount": "@Html.DisplayFor(model => model.Item1.amount)",
+        "currency": "@Html.DisplayFor(model => model.Item1.currency)",
+        "name": "@Html.DisplayFor(model => model.Item1.name)",
+        "description": "@Html.DisplayFor(model => model.Item1.description)",
+        "image": "https://placehold.co/100x100",
+        "order_id": "@Html.DisplayFor(model => model.Item1.orderId)",
+        "handler": function (response) {
+            var paymentStatus = response ? 'paid' : 'pending';
+
+            if (response.error || response.razorpay_payment_id === null) {
+                paymentStatus = 'pending';
+            } else {               
+                paymentStatus = 'paid';
+                document.getElementById('rzp_paymentid').value = response.razorpay_payment_id;
+            }
+
+            document.getElementById('rzp-paymentstatus').value = paymentStatus;
+            document.getElementById('rzp-paymentresponse').click();
+            document.getElementById('rzp_orderid').value = response.razorpay_order_id;            
+            
+            
+            var orderId = @Json.Serialize(Model.Item2);
+            var paymentId = response.razorpay_payment_id;
+
+            window.location.href = '/Customer/Cart/OrderConfirmation?Id=' + orderId + '&paymentStatus=' + paymentStatus + '&paymentId=' + paymentId;
+        },
+        "prefill": {
+            "name": "@Html.DisplayFor(model => model.Item1.name)",
+            "email": "@Html.DisplayFor(model => model.Item1.email)",
+            "contact": "@Html.DisplayFor(model => model.Item1.contactNumber)"
+        },
+        "notes": {
+            "address": "@Html.DisplayFor(model => model.Item1.address)"
+        },
+        "theme": {
+            "color": "#F37254"
+        },
+        "modal": {
+            ondismiss: function () {
+                var orderId = @Json.Serialize(Model.Item2);
+                var paymentStatus = 'pending';
+                var paymentId = null;
+
+                window.location.href = '/Customer/Cart/OrderConfirmation?Id=' + orderId + '&paymentStatus=' + paymentStatus + '&paymentId=' + paymentId;
+            }
+        }
+    };
+    var rzp1 = new Razorpay(options);
+
+    window.onload = function () {
+        document.getElementById('rzp-button1').click();
+    };
+
+    document.getElementById('rzp-button1').onclick = function (e) {
+        rzp1.open();
+        e.preventDefault();
+    };
+</script>
+
+
+<!-- Hidden form to submit payment response -->
+@using (Html.BeginForm("Complete", "Payment"))
+{
+    @Html.AntiForgeryToken()
+
+    @Html.Hidden("rzp_paymentid")
+    @Html.Hidden("rzp_orderid")
+    @Html.Hidden("paymentStatus", null, new { id = "rzp-paymentstatus" }) <!-- Add a hidden field for payment status -->
+    <button type="submit" id="rzp-paymentresponse" hidden>Submit</button>
+}
+
+<style>
+    .rzp-container {
+        filter: blur(4px);
+        pointer-events: none;
+    }
+</style>
