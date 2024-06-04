@@ -4,10 +4,15 @@
     <a asp-controller="Home" asp-action="Index" class="btn btn-outline-danger" style="margin-left:1050px; white-space: nowrap;">Back To Home</a>
 </div>
 
+@{
+    var categoryName = Model.Item2.CategoryList.FirstOrDefault()?.Text;
+}
+<h6 style="margin-top:-50px">ExpressCart > @categoryName?.ToUpper()</h6>
+
 @foreach (var subcategory in Model.Item2.SubCategoryList)
 {
     var subcategoryId = subcategory.Value.ToString();
-    var subcategoryName = subcategory.Text.ToString();
+    var subcategoryName = subcategory.Text.ToString(); 
 
     <h3>@subcategoryName</h3>
 
