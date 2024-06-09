@@ -1,0 +1,103 @@
+﻿@model List<AirportDetails>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Booking Page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <style>
+        .booking-form {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .form-group-inline {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .submit-btn {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="booking-form">
+            <h2>Book Your Trip</h2>
+            <form>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="fromDropdown">From:</label>
+                        <select id="fromDropdown" name="fromCity" class="form-control">
+                            <option value="" disabled selected>Where From?</option>
+                            @foreach (var airport in Model)
+                            {
+                                <option value="@airport.Code">@airport.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="toDropdown">To:</label>
+                        <select id="toDropdown" name="toCity" class="form-control">
+                            <option value="" disabled selected>Where To?</option>
+                            @foreach (var airport in Model)
+                            {
+                                <option value="@airport.Code">@airport.Name</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <label for="DatesDropdown">Depart On:</label>
+                <label style="margin-left:450px" for="DatesDropdown">Return On:</label>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <input type="date" id="startDateInput" name="StartDate" class="form-control" placeholder="Start Date" min="@DateTime.Now.ToString("yyyy-MM-dd")" onclick="this.showPicker()" />
+                    </div>
+                    <div class="form-group col-md-6">
+                        <input type="date" id="endDateInput" name="EndDate" class="form-control" placeholder="End Date" onclick="this.showPicker()" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="membersInput" class="col-form-label">Adults:</label>
+                        <input type="number" id="membersInput" name="NoOfAdults" class="form-control" placeholder="Adults" min="0" />
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="childrenInput" class="col-form-label">Children:</label>
+                        <input type="number" id="childrenInput" name="NoOfChildrens" class="form-control" placeholder="Children" min="0" />
+                    </div>
+                </div>
+                <div class="submit-btn">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('startDateInput').addEventListener('change', function () {
+            var startDate = new Date(this.value);
+            var endDateInput = document.getElementById('endDateInput');
+
+            if (startDate) {
+                endDateInput.min = this.value;
+                endDateInput.disabled = false;
+            } else {
+                endDateInput.min = "";
+                endDateInput.disabled = true;
+            }
+        });
+    </script>
+
+</body>
+</html>

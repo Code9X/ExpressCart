@@ -216,8 +216,8 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
 			_unitOfWork.Save();
 
 			// Generate Razorpay order
-			string secretKey = _configuration["PaymentSettings:SecretKey"];
-			string publishableKey = _configuration["PaymentSettings:PublishableKey"];
+			string secretKey = _configuration["Razor:SecretKey"];
+			string publishableKey = _configuration["Razor:PublishableKey"];
 
 			RazorpayClient client = new RazorpayClient(secretKey, publishableKey);
 			Dictionary<string, object> options = new Dictionary<string, object>();

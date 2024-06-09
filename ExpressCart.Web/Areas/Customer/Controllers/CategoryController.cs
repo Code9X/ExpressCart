@@ -123,7 +123,11 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
             var viewModel = new Tuple<ProductVM, CategoryVM>(productVM, categoryVM);
 
             Logging.LogAction(nameof(CategoryController), "Index page visited.", GetUserId());
-            return View(viewModel);
+
+            if (categoryVM.CategoryList.FirstOrDefault()?.Text != "Travel")
+                return View(viewModel);
+            else
+                return RedirectToAction("Index", "Travel", new { categoryId = categoryId, searchTerm = searchTerm });
         }
         public IActionResult Details(int productId)
         {
@@ -179,7 +183,6 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
 
             }
         }
-
         public IActionResult Summary(ShoppingCart shoppingCart)
         {
             shoppingCart.ApplicationUserId = GetUserId();
@@ -212,7 +215,6 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
             Logging.LogAction(nameof(CategoryController), "Summary page visited.", GetUserId());
             return View("Summary", shoppingCartVM);
         }
-        [HttpPost]
 		[HttpPost]
 		[ActionName("Summary")]
 		public IActionResult SummaryPost(string action, ShoppingCartVM shoppingCartVM, int count)
@@ -265,8 +267,8 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
 
             _unitOfWork.OrderDetail.Add(orderDetail);
             // Generate Razorpay order
-            string secretKey = _configuration["PaymentSettings:SecretKey"];
-            string publishableKey = _configuration["PaymentSettings:PublishableKey"];
+            string secretKey = _configuration["Razor:SecretKey"];
+            string publishableKey = _configuration["Razor:PublishableKey"];
 
             RazorpayClient client = new RazorpayClient(secretKey, publishableKey);
             Dictionary<string, object> options = new Dictionary<string, object>();
@@ -336,7 +338,5 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
                 return View("OrderCancelled");
             }
         }
-
-
     }
 }

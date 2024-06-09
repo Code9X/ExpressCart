@@ -17,7 +17,13 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.Configure<RazorpaySettings>(builder.Configuration.GetSection("PaymentSettings"));
+builder.Services.Configure<API>(options =>
+{
+    options.SecretKey = builder.Configuration["RazorAPI:SecretKey"];
+    options.PublishableKey = builder.Configuration["RazorAPI:PublishableKey"];
+    options.countryApiUrl = builder.Configuration["CountryAPI:countryApiUrl"];
+});
+
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();

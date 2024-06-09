@@ -19,6 +19,7 @@ namespace ExpressCart.DataAccess.Repository.IRepository
         IApplicationUserRepository ApplicationUser { get; }
 		IOrderHeaderRepository OrderHeader { get; }
 		IOrderDetailRepository OrderDetail { get; }
+		ITravelRepository Travel { get; }
 		void Save();
     }
 }

@@ -25,8 +25,9 @@ namespace ExpressCart.DataAccess.Data
         public DbSet<OrderDetail> OrderDetails { get; set; }
 		public DbSet<Addvertisement> Addvertisements { get; set; }
 		public DbSet<AddvertisementImage> AddvertisementImages { get; set; }
+		public DbSet<Travel> Travels { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Category>().HasData
