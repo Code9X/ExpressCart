@@ -29,8 +29,12 @@
     </style>
 </head>
 <body>
+    @{
+        var categoryName = ViewBag.Category;
+    }
     <div class="container mt-5">
         <div class="booking-form">
+            <h6 style="margin-top: -50px;"><a asp-controller="Home" asp-action="Index" style="text-decoration: none; color: deepskyblue;">ExpressCart</a> > @(categoryName?.ToUpper())</h6>
             <h2>Book Your Trip</h2>
             <form>
                 <div class="form-row">

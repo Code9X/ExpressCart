@@ -23,8 +23,11 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
             _configuration = configuration;
             _unitOfWork = unitOfWork;
         }
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int categoryId)
         {
+            var category = _unitOfWork.Category.Get(u=>u.Id== categoryId);
+            ViewBag.Category = category.Name;
+
             List<AirportDetails> airportData = await GetAirportDtlsAsync();
             return View(airportData);
         }

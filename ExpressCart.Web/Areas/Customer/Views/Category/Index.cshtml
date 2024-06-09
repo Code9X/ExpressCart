@@ -7,7 +7,7 @@
 @{
     var categoryName = Model.Item2.CategoryList.FirstOrDefault()?.Text;
 }
-<h6 style="margin-top:-50px">ExpressCart > @categoryName?.ToUpper()</h6>
+<h6 style="margin-top: -50px;"><a asp-controller="Home" asp-action="Index" style="text-decoration: none; color: deepskyblue;">ExpressCart</a> > @categoryName?.ToUpper()</h6>
 
 @foreach (var subcategory in Model.Item2.SubCategoryList)
 {
