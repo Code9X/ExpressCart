@@ -19,9 +19,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 //API Config
-builder.Services.Configure<API>(builder.Configuration);
+builder.Services.Configure<API>(builder.Configuration.GetSection("API"));
 builder.Services.AddSingleton<IAPIRepository, APIRepository>();
-builder.Services.AddTransient<TravelController>();
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();

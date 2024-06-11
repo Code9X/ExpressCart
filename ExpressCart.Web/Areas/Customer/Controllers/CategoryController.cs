@@ -17,13 +17,13 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
     public class CategoryController : Controller
     {
         private readonly ILogger<CategoryController> _logger;
-        private readonly IUnitOfWork _unitOfWork; 
-        private readonly IConfiguration _configuration;
-        public CategoryController(ILogger<CategoryController> logger, IUnitOfWork unitOfWork, IConfiguration configuration)
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IAPIRepository _apiRepository;
+        public CategoryController(ILogger<CategoryController> logger, IUnitOfWork unitOfWork, IAPIRepository apiRepository)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
-            _configuration = configuration;
+            _apiRepository = apiRepository;
         }
         private string GetUserId()
         {
@@ -267,8 +267,8 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
 
             _unitOfWork.OrderDetail.Add(orderDetail);
             // Generate Razorpay order
-            string secretKey = _configuration["Razor:SecretKey"];
-            string publishableKey = _configuration["Razor:PublishableKey"];
+            string secretKey = _apiRepository.GetRazorSecretKey();
+            string publishableKey = _apiRepository.GetRazorPublishableKey();
 
             RazorpayClient client = new RazorpayClient(secretKey, publishableKey);
             Dictionary<string, object> options = new Dictionary<string, object>();

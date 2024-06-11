@@ -14,6 +14,7 @@ using System.Security.Cryptography;
 using ExpressCart.DataAccess.Repository.IRepository;
 using Stripe.Checkout;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
+using ExpressCart.DataAccess.Repository;
 
 namespace ExpressCartWeb.Areas.Customer.Controllers
 {
@@ -22,13 +23,13 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
 	public class CartController : Controller
 	{
 		private readonly IUnitOfWork _unitOfWork;
-		private readonly IConfiguration _configuration;
+		private readonly IAPIRepository _apiRepository;
 		[BindProperty]
 		public ShoppingCartVM shoppingCartVM { get; set; }
-		public CartController(IUnitOfWork unitOfWork, IConfiguration configuration)
+		public CartController(IUnitOfWork unitOfWork, IAPIRepository apiRepository)
 		{
 			_unitOfWork = unitOfWork;
-			_configuration = configuration;
+            _apiRepository = apiRepository;
 		}
         private string GetUserId()
         {
@@ -146,11 +147,11 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
                     Count = item.Count
                 };
                 _unitOfWork.OrderDetail.Add(orderDetail);
-            }            
+            }
 
             // Generate Razorpay order
-            string secretKey = _configuration["Razor:SecretKey"];
-            string publishableKey = _configuration["Razor:PublishableKey"];
+            string secretKey = _apiRepository.GetRazorSecretKey();
+            string publishableKey = _apiRepository.GetRazorPublishableKey();
 
             RazorpayClient client = new RazorpayClient(secretKey, publishableKey);
             Dictionary<string, object> options = new Dictionary<string, object>();
