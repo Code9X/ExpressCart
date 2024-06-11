@@ -1,9 +1,11 @@
 ﻿using System.Net.Http.Headers;
+using System.Security.Claims;
 using System.Text.Json;
 using ExpressCart.DataAccess.Repository;
 using ExpressCart.DataAccess.Repository.IRepository;
 using ExpressCart.Models;
 using ExpressCart.Models.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Newtonsoft.Json;
@@ -12,61 +14,114 @@ using Stripe;
 
 namespace ExpressCartWeb.Areas.Customer.Controllers
 {
+    [Authorize]
     [Area("Customer")]
     public class TravelController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IConfiguration _configuration;
+        private readonly IAPIRepository _apiRepository;
         private readonly HttpClient client;
-        public TravelController(IConfiguration configuration, IUnitOfWork unitOfWork)
+
+        private string GetUserId()
         {
-            _configuration = configuration;
+            if (User.Identity.IsAuthenticated)
+            {
+                var claimsIdentity = (ClaimsIdentity)User.Identity;
+                return claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            }
+            return null;
+        }
+        public TravelController(IAPIRepository apiRepository, IUnitOfWork unitOfWork)
+        {
+            _apiRepository = apiRepository;
             _unitOfWork = unitOfWork;
         }
         public async Task<IActionResult> Index(int categoryId)
         {
-            var category = _unitOfWork.Category.Get(u=>u.Id== categoryId);
+            var category = _unitOfWork.Category.Get(u => u.Id == categoryId);
             ViewBag.Category = category.Name;
+            ViewBag.CategoryId = categoryId;
 
             List<AirportDetails> airportData = await GetAirportDtlsAsync();
-            return View(airportData);
+            ViewBag.AirportData = airportData;
+
+            // Select a random airport
+            var random = new Random();
+            int index = random.Next(airportData.Count);
+            var randomAirport = airportData[index];
+            ViewBag.RandomAirportCode = randomAirport.Code;
+            ViewBag.RandomAirportName = randomAirport.Name;
+
+            return View(new Travel());
         }
+
+        [HttpPost]
+        public IActionResult Index(Travel travel)
+        {
+            travel.UserId = GetUserId();
+
+            if (travel.Id == 0)
+            {
+                _unitOfWork.Travel.Add(travel);
+                TempData["success"] = "Travel details added successfully.";
+            }
+            else
+            {
+                _unitOfWork.Travel.Update(travel);
+                TempData["success"] = "Travel details updated successfully.";
+            }
+            _unitOfWork.Save();
+            return RedirectToAction("Index");
+        }
+
         private async Task<List<AirportDetails>> GetAirportDtlsAsync()
         {
-            using (var client = new HttpClient())
+            return await Task.FromResult(new List<AirportDetails>
             {
-                string countryAPIUrl = _configuration["CountryAPI:countryApiUrl"];
-                string apiKey = _configuration["CountryAPI:ApiKey"];
-
-                client.DefaultRequestHeaders.Clear();
-                client.DefaultRequestHeaders.Add("x-rapidapi-key", apiKey);
-                client.DefaultRequestHeaders.Add("x-rapidapi-host", "booking-com15.p.rapidapi.com");
-
-                HttpResponseMessage response = await client.GetAsync(countryAPIUrl);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    string json = await response.Content.ReadAsStringAsync();
-                    dynamic jsonResponse = JsonConvert.DeserializeObject(json);
-
-                    List<AirportDetails> airports = new List<AirportDetails>();
-
-                    foreach (var item in jsonResponse.data)
-                    {
-                        airports.Add(new AirportDetails
-                        {
-                            // Concatenating city name and code
-                            Code = (string)item.cityName,
-                            Name = $"{(string)item.name} - {(string)item.code}"
-                        });
-                    }
-
-                    return airports;
-                }
-
-                return new List<AirportDetails>();
-            }
+                new AirportDetails { Code = "JFK", Name = "John F. Kennedy International Airport" },
+                new AirportDetails { Code = "LAX", Name = "Los Angeles International Airport" },
+                new AirportDetails { Code = "ORD", Name = "O'Hare International Airport" }
+            });
         }
+
+
+
+        //private async Task<List<AirportDetails>> GetAirportDtls()
+        //{
+        //    using (var client = new HttpClient())
+        //    {
+        //        string countryAPIUrl = _apiRepository.GetCountryApiUrl();
+        //        string apiKey = _apiRepository.GetCountryApiKey();
+
+        //        client.DefaultRequestHeaders.Clear();
+        //        client.DefaultRequestHeaders.Add("x-rapidapi-key", apiKey);
+        //        client.DefaultRequestHeaders.Add("x-rapidapi-host", "booking-com15.p.rapidapi.com");
+
+        //        HttpResponseMessage response = await client.GetAsync(countryAPIUrl);
+
+        //        if (response.IsSuccessStatusCode)
+        //        {
+        //            string json = await response.Content.ReadAsStringAsync();
+        //            dynamic jsonResponse = JsonConvert.DeserializeObject(json);
+
+        //            List<AirportDetails> airports = new List<AirportDetails>();
+
+        //            foreach (var item in jsonResponse.data)
+        //            {
+        //                airports.Add(new AirportDetails
+        //                {
+        //                    // Concatenating city name and code
+        //                    Code = (string)item.cityName,
+        //                    Name = $"{(string)item.name} - {(string)item.code}"
+        //                });
+        //            }
+
+        //            return airports;
+        //        }
+
+        //        return new List<AirportDetails>();
+        //    }
+        //}
 
     }
 }

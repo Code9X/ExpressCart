@@ -8,11 +8,20 @@ namespace ExpressCart.Utility
 {
     public class API
     {
-        //RazorAPI
+        public RazorAPIConfig RazorAPI { get; set; }
+        public CountryAPIConfig CountryAPI { get; set; }
+    }
+
+    public class RazorAPIConfig
+    {
         public string SecretKey { get; set; }
         public string PublishableKey { get; set; }
-        //CountryAPI
+    }
+
+    public class CountryAPIConfig
+    {
         public string countryApiUrl { get; set; }
         public string ApiKey { get; set; }
     }
+
 }

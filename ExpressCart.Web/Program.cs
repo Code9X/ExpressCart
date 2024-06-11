@@ -3,6 +3,7 @@ using ExpressCart.DataAccess.DbInitializer;
 using ExpressCart.DataAccess.Repository;
 using ExpressCart.DataAccess.Repository.IRepository;
 using ExpressCart.Utility;
+using ExpressCartWeb.Areas.Customer.Controllers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -17,13 +18,10 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.Configure<API>(options =>
-{
-    options.SecretKey = builder.Configuration["RazorAPI:SecretKey"];
-    options.PublishableKey = builder.Configuration["RazorAPI:PublishableKey"];
-    options.countryApiUrl = builder.Configuration["CountryAPI:countryApiUrl"];
-});
-
+//API Config
+builder.Services.Configure<API>(builder.Configuration);
+builder.Services.AddSingleton<IAPIRepository, APIRepository>();
+builder.Services.AddTransient<TravelController>();
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();

@@ -1,4 +1,4 @@
-﻿@model List<AirportDetails>
+﻿@model Travel
 
 <!DOCTYPE html>
 <html>
@@ -36,13 +36,16 @@
         <div class="booking-form">
             <h6 style="margin-top: -50px;"><a asp-controller="Home" asp-action="Index" style="text-decoration: none; color: deepskyblue;">ExpressCart</a> > @(categoryName?.ToUpper())</h6>
             <h2>Book Your Trip</h2>
-            <form>
+            <form method="post">
+                <input type="hidden" name="Id" value="@Model.Id" />
+                <input type="hidden" name="CategoryId" value="@ViewBag.CategoryId" />
+
                 <div class="form-row">
                     <div class="form-group col-md-6">
                         <label for="fromDropdown">From:</label>
-                        <select id="fromDropdown" name="fromCity" class="form-control">
+                        <select id="fromDropdown" name="DepartureLocation" class="form-control">
                             <option value="" disabled selected>Where From?</option>
-                            @foreach (var airport in Model)
+                            @foreach (var airport in ViewBag.AirportData)
                             {
                                 <option value="@airport.Code">@airport.Name</option>
                             }
@@ -50,9 +53,9 @@
                     </div>
                     <div class="form-group col-md-6">
                         <label for="toDropdown">To:</label>
-                        <select id="toDropdown" name="toCity" class="form-control">
+                        <select id="toDropdown" name="DestinationLocation" class="form-control">
                             <option value="" disabled selected>Where To?</option>
-                            @foreach (var airport in Model)
+                            @foreach (var airport in ViewBag.AirportData)
                             {
                                 <option value="@airport.Code">@airport.Name</option>
                             }
@@ -63,20 +66,10 @@
                 <label style="margin-left:450px" for="DatesDropdown">Return On:</label>
                 <div class="form-row">
                     <div class="form-group col-md-6">
-                        <input type="date" id="startDateInput" name="StartDate" class="form-control" placeholder="Start Date" min="@DateTime.Now.ToString("yyyy-MM-dd")" onclick="this.showPicker()" />
+                        <input type="date" id="startDateInput" name="DepartureDate" class="form-control" placeholder="Start Date" min="@DateTime.Now.ToString("yyyy-MM-dd")" onclick="this.showPicker()" />
                     </div>
                     <div class="form-group col-md-6">
-                        <input type="date" id="endDateInput" name="EndDate" class="form-control" placeholder="End Date" onclick="this.showPicker()" />
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="membersInput" class="col-form-label">Adults:</label>
-                        <input type="number" id="membersInput" name="NoOfAdults" class="form-control" placeholder="Adults" min="0" />
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label for="childrenInput" class="col-form-label">Children:</label>
-                        <input type="number" id="childrenInput" name="NoOfChildrens" class="form-control" placeholder="Children" min="0" />
+                        <input type="date" id="endDateInput" name="DestinationDate" class="form-control" placeholder="End Date" onclick="this.showPicker()" />
                     </div>
                 </div>
                 <div class="submit-btn">
@@ -100,8 +93,23 @@
                 endDateInput.min = "";
                 endDateInput.disabled = true;
             }
+
+            // Check if the selected return date is before the departure date
+            var endDate = new Date(document.getElementById('endDateInput').value);
+            if (endDate < startDate) {
+                document.getElementById('endDateInput').value = "";
+            }
+        });
+
+        document.getElementById('endDateInput').addEventListener('change', function () {
+            var endDate = new Date(this.value);
+            var startDate = new Date(document.getElementById('startDateInput').value);
+
+            // Check if the selected return date is before the departure date
+            if (endDate < startDate) {
+                this.value = "";
+            }
         });
     </script>
-
 </body>
 </html>

@@ -22,14 +22,14 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
 	{
 		private readonly ILogger<HomeController> _logger;
 		private readonly IUnitOfWork _unitOfWork;
-		private readonly IConfiguration _configuration;
-		private string UserId;
+        private readonly IAPIRepository _apiRepository;
+        private string UserId;
         public ShoppingCartVM shoppingCartVM { get; set; }
-		public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork, IConfiguration configuration)
+		public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork, IAPIRepository apiRepository)
 		{
 			_logger = logger;
 			_unitOfWork = unitOfWork;
-			_configuration = configuration;
+            _apiRepository = apiRepository;
         }
         private string GetUserId()
         {
@@ -215,11 +215,11 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
             _unitOfWork.OrderDetail.Add(orderDetail);
 			_unitOfWork.Save();
 
-			// Generate Razorpay order
-			string secretKey = _configuration["Razor:SecretKey"];
-			string publishableKey = _configuration["Razor:PublishableKey"];
+            // Generate Razorpay order
+            string secretKey = _apiRepository.GetRazorSecretKey();
+            string publishableKey = _apiRepository.GetRazorPublishableKey();
 
-			RazorpayClient client = new RazorpayClient(secretKey, publishableKey);
+            RazorpayClient client = new RazorpayClient(secretKey, publishableKey);
 			Dictionary<string, object> options = new Dictionary<string, object>();
 			options.Add("amount", shoppingCartVM.OrderHeader.OrderTotal * 100);
 			options.Add("receipt", "order_rcptid_" + DateTime.Now.ToString("yyyyMMddHHmmss"));
