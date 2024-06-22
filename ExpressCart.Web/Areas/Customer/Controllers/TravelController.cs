@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Headers;
+﻿using System.Drawing.Text;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Json;
 using ExpressCart.DataAccess.Repository;
@@ -61,20 +62,9 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
         [HttpPost]
         public IActionResult Index(Travel travel)
         {
-            travel.UserId = GetUserId();
+            //List<FlightData> flightDetails = await GetFlightDetailsAsync()
 
-            if (travel.Id == 0)
-            {
-                _unitOfWork.Travel.Add(travel);
-                TempData["success"] = "Travel details added successfully.";
-            }
-            else
-            {
-                _unitOfWork.Travel.Update(travel);
-                TempData["success"] = "Travel details updated successfully.";
-            }
-            _unitOfWork.Save();
-            return RedirectToAction("Index","Home");
+            return View(travel);
         }
         private async Task<List<AirportDetails>> GetAirportDtlsAsync()
         {
@@ -123,5 +113,156 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
         //    }
         //}
 
+        private async Task<List<FlightData>> GetFlightDetailsAsync(string originLocCode, string destinationLocCode, string depDate, string returnDate, int adults, int children, 
+                                                                   string travelClass, bool nonStop, string currencyCode,string maxPrice,string maxCount)
+        {
+            string baseUrl = _apiRepository.GetFlightApiUrl();
+            string apiKey = _apiRepository.GetFlightApiKey();
+
+            string formattedUrl = string.Format(baseUrl, originLocCode, destinationLocCode, depDate, returnDate, adults, children, travelClass, nonStop, currencyCode, maxPrice, maxCount);
+
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Clear();
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+
+                HttpResponseMessage response = await client.GetAsync(formattedUrl);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string json = await response.Content.ReadAsStringAsync();
+                    var root = JsonConvert.DeserializeObject<Root>(json);
+
+                    return root.Data;
+                }
+                else
+                {
+                    string message = response.StatusCode.ToString();
+                    TempData["success"] = message;
+                }
+
+                return new List<FlightData>();
+            }
+        }
+
+
     }
+
+    public class Root
+    {
+        public Meta Meta { get; set; }
+        public List<FlightData> Data { get; set; }
+    }
+
+    public class Meta
+    {
+        // Define properties according to the JSON structure
+    }
+
+    public class FlightData
+    {
+        public string Id { get; set; }
+        public string Source { get; set; }
+        public bool InstantTicketingRequired { get; set; }
+        public bool NonHomogeneous { get; set; }
+        public bool OneWay { get; set; }
+        public bool IsUpsellOffer { get; set; }
+        public DateTime LastTicketingDate { get; set; }
+        public int NumberOfBookableSeats { get; set; }
+        public List<Itinerary> Itineraries { get; set; }
+        public Price Price { get; set; }
+        public PricingOptions PricingOptions { get; set; }
+        public List<string> ValidatingAirlineCodes { get; set; }
+        public List<TravelerPricing> TravelerPricings { get; set; }
+    }
+
+    public class Itinerary
+    {
+        public string Duration { get; set; }
+        public List<Segment> Segments { get; set; }
+    }
+
+    public class Segment
+    {
+        public Departure Departure { get; set; }
+        public Arrival Arrival { get; set; }
+        public string CarrierCode { get; set; }
+        public string Number { get; set; }
+        public Aircraft Aircraft { get; set; }
+        public Operating Operating { get; set; }
+        public string Duration { get; set; }
+        public string Id { get; set; }
+        public int NumberOfStops { get; set; }
+        public bool BlacklistedInEU { get; set; }
+    }
+
+    public class Departure
+    {
+        public string IataCode { get; set; }
+        public string Terminal { get; set; }
+        public DateTime At { get; set; }
+    }
+
+    public class Arrival
+    {
+        public string IataCode { get; set; }
+        public DateTime At { get; set; }
+    }
+
+    public class Aircraft
+    {
+        public string Code { get; set; }
+    }
+
+    public class Operating
+    {
+        public string CarrierCode { get; set; }
+    }
+
+    public class Price
+    {
+        public string Currency { get; set; }
+        public string Total { get; set; }
+        public string Base { get; set; }
+        public List<Fee> Fees { get; set; }
+        public string GrandTotal { get; set; }
+    }
+
+    public class Fee
+    {
+        public string Amount { get; set; }
+        public string Type { get; set; }
+    }
+
+    public class PricingOptions
+    {
+        public List<string> FareType { get; set; }
+        public bool IncludedCheckedBagsOnly { get; set; }
+    }
+
+    public class TravelerPricing
+    {
+        public string TravelerId { get; set; }
+        public string FareOption { get; set; }
+        public string TravelerType { get; set; }
+        public Price Price { get; set; }
+        public List<FareDetailsBySegment> FareDetailsBySegment { get; set; }
+    }
+
+    public class FareDetailsBySegment
+    {
+        public string SegmentId { get; set; }
+        public string Cabin { get; set; }
+        public string FareBasis { get; set; }
+        public string Class { get; set; }
+        public IncludedCheckedBags IncludedCheckedBags { get; set; }
+    }
+
+    public class IncludedCheckedBags
+    {
+        public int Weight { get; set; }
+        public string WeightUnit { get; set; }
+    }
+
+
 }

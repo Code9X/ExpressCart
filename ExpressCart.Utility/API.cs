@@ -10,8 +10,10 @@ namespace ExpressCart.Utility
     {
         public RazorAPIConfig RazorAPI { get; set; }
         public CountryAPIConfig CountryAPI { get; set; }
+        public FlightAPIConfig FlightAPI { get; set; }
     }
 
+    //List the new Api Models Down here and add them in the class API
     public class RazorAPIConfig
     {
         public string SecretKey { get; set; }
@@ -21,6 +23,12 @@ namespace ExpressCart.Utility
     public class CountryAPIConfig
     {
         public string countryApiUrl { get; set; }
+        public string ApiKey { get; set; }
+    }
+
+    public class FlightAPIConfig
+    {
+        public string Url { get; set; }
         public string ApiKey { get; set; }
     }
 

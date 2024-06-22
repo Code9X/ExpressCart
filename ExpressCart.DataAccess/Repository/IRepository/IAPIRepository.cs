@@ -13,5 +13,7 @@ namespace ExpressCart.DataAccess.Repository.IRepository
         string GetRazorPublishableKey();
         string GetCountryApiUrl();
         string GetCountryApiKey();
+        string GetFlightApiUrl();
+        string GetFlightApiKey();
     }
 }

@@ -12,16 +12,18 @@
 <body>
     <div class="container mt-5">
         <div class="booking-form">
-            <h6 style="margin-top: -50px;"><a asp-controller="Home" asp-action="Index" style="text-decoration: none; color: deepskyblue;">ExpressCart</a> > @Model.CategoryName.ToUpper()</h6>
+            <h6 style="margin-top: -50px;">
+                <a asp-controller="Home" asp-action="Index" style="text-decoration: none; color: deepskyblue;">ExpressCart</a> > @Model.CategoryName.ToUpper()
+            </h6>
             <h2>Book Your Trip</h2>
             <form method="post">
                 <input type="hidden" asp-for="Travel.Id" />
                 <input type="hidden" asp-for="CategoryId" />
 
                 <div class="form-row">
-                    <div class="form-group col-md-6">
+                    <div class="form-group>
                         <label for="fromDropdown">From:</label>
-                        <select id="fromDropdown" asp-for="Travel.DepartureLocation" class="form-control">
+                        <select style="width: 350px;" id="fromDropdown" asp-for="Travel.DepartureLocation" class="form-control">
                             <option value="" disabled selected>Where From?</option>
                             @foreach (var airport in Model.AirportData)
                             {
@@ -29,9 +31,9 @@
                             }
                         </select>
                     </div>
-                    <div class="form-group col-md-6">
+                    <div style="margin-left:50px" class="form-group>
                         <label for="toDropdown">To:</label>
-                        <select id="toDropdown" asp-for="Travel.DestinationLocation" class="form-control">
+                        <select style="width: 350px;" id="toDropdown" asp-for="Travel.DestinationLocation" class="form-control">
                             <option value="" disabled selected>Where To?</option>
                             @foreach (var airport in Model.AirportData)
                             {
@@ -39,16 +41,54 @@
                             }
                         </select>
                     </div>
+                    <div style="margin-left:50px;" class="form-group>
+                        <label for="adultsInput">Adults:</label>
+                        <input style="width: 100px;" type="number" asp-for="Travel.Adults_count" class="form-control" id="adultsInput" name="Travel.Adults" min="0" />
+                    </div>
+                    <div style="margin-left:50px" class="form-group>
+                        <label for="childrenInput">Children:</label>
+                        <input style="width: 100px;" type="number" asp-for="Travel.Childerns_count" class="form-control" id="childrenInput" name="Travel.Children" min="0" />
+                    </div>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="startDateInput">Departure Date:</label>
-                        <input type="datetime-local" asp-for="Travel.DepartureDate" class="form-control" id="startDateInput" name="Travel.DepartureDate" />
+                <div style="margin-top:15px" class="form-row">
+                    <div class="form-group>
+                        <label for="startDateInput">Depart On:</label>
+                        <input style="width: 220px;" type="datetime-local" asp-for="Travel.DepartureDate" class="form-control" id="startDateInput" name="Travel.DepartureDate" />
                     </div>
-                    <div class="form-group col-md-6">
-                        <label for="endDateInput">Destination Date:</label>
-                        <input type="datetime-local" asp-for="Travel.DestinationDate" class="form-control" id="endDateInput" name="Travel.DestinationDate" />
+                    <div style="margin-left:30px" class="form-group>
+                        <label for="endDateInput">Return On:</label>
+                        <input style="width: 220px;" type="datetime-local" asp-for="Travel.DestinationDate" class="form-control" id="endDateInput" name="Travel.DestinationDate" placeholder="Return On" />
+                    </div>
+                    <div style="margin-left:30px" class="form-group>
+                        <label for="CurrencyCodeDropdown">Currency :</label>
+                        <select style="width: 100px;" id="CurrencyCodeDropdown" asp-for="CurrencyCode" class="form-control">
+                            <option value="INR">INR</option>
+                            <option value="USD">USD</option>
+                        </select>
+                    </div>
+                    <div style="margin-left:30px" class="form-group>
+                        <label for="MaxPriceInput">Max. Price:</label>
+                        <input style="width: 120px;" type="number" id="MaxPriceInput" asp-for="MaxPrice" class="form-control" min="0" />
+                    </div>
+                    <div style="margin-left: 50px;" class="form-group>
+                        <label for="classDropdown">Class:</label>
+                        <select style="width: 150px;" id="classDropdown" asp-for="Class" class="form-control">
+                            <option value="ECONOMY">ECONOMY</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="margin-top:15px" class="form-row">                    
+                    <div class="form-group>
+                        <label for="MaxCountInput">Show :</label>
+                        <input style="width:70px" type="number" id="MaxCountInput" asp-for="MaxCount" class="form-control" min="0" />
+                    </div>
+                    <div style="margin-left:40px" class="form-group align-self-center">
+                        <div class="form-check mt-4">
+                            <input type="checkbox" class="form-check-input" asp-for="NonStop" id="nonStopCheck" />
+                            <label class="form-check-label" for="nonStopCheck">Non Stop</label>
+                        </div>
                     </div>
                 </div>
 
@@ -62,31 +102,63 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.getElementById('startDateInput').addEventListener('change', function () {
-            var startDate = new Date(this.value);
+        function pad(num) {
+            return num < 10 ? '0' + num : num;
+        }
+
+        function getCurrentDateTime() {
+            var now = new Date();
+            var year = now.getFullYear();
+            var month = pad(now.getMonth() + 1);
+            var day = pad(now.getDate());
+            var hours = pad(now.getHours());
+            var minutes = pad(now.getMinutes());
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+
+        function getTomorrowDate() {
+            var now = new Date();
+            now.setDate(now.getDate() + 1);
+            var year = now.getFullYear();
+            var month = pad(now.getMonth() + 1);
+            var day = pad(now.getDate());
+            var hours = pad(now.getHours());
+            var minutes = pad(now.getMinutes());
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            var startDateInput = document.getElementById('startDateInput');
             var endDateInput = document.getElementById('endDateInput');
 
-            if (startDate) {
+            // Set the initial value and min attribute for the departure date
+            var currentDateTime = getCurrentDateTime();
+            startDateInput.value = currentDateTime;
+            startDateInput.min = currentDateTime;
+
+            // Set the placeholder and initial value for the destination date
+            endDateInput.placeholder = "Return On";
+            endDateInput.value = getTomorrowDate();
+
+            // Update the destination date based on the selected departure date
+            startDateInput.addEventListener('change', function () {
+                var startDate = new Date(this.value);
+                var endDate = new Date(startDate);
+                endDate.setDate(startDate.getDate() + 1);
                 endDateInput.min = this.value;
-                endDateInput.disabled = false;
-            } else {
-                endDateInput.min = "";
-                endDateInput.disabled = true;
-            }
+                endDateInput.value = `${endDate.getFullYear()}-${pad(endDate.getMonth() + 1)}-${pad(endDate.getDate())}T${pad(endDate.getHours())}:${pad(endDate.getMinutes())}`;
+                endDateInput.placeholder = "Return On";
+            });
 
-            var endDate = new Date(document.getElementById('endDateInput').value);
-            if (endDate < startDate) {
-                document.getElementById('endDateInput').value = "";
-            }
-        });
+            // Ensure the destination date cannot be before the departure date
+            endDateInput.addEventListener('change', function () {
+                var endDate = new Date(this.value);
+                var startDate = new Date(startDateInput.value);
 
-        document.getElementById('endDateInput').addEventListener('change', function () {
-            var endDate = new Date(this.value);
-            var startDate = new Date(document.getElementById('startDateInput').value);
-
-            if (endDate < startDate) {
-                this.value = "";
-            }
+                if (endDate < startDate) {
+                    this.value = `${startDate.getFullYear()}-${pad(startDate.getMonth() + 1)}-${pad(startDate.getDate() + 1)}T${pad(startDate.getHours())}:${pad(startDate.getMinutes())}`;
+                }
+            });
         });
     </script>
 </body>
