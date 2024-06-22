@@ -60,11 +60,36 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
             return View(travelvm);
         } 
         [HttpPost]
-        public IActionResult Index(Travel travel)
+        public async Task<IActionResult> Index(TravelVM travelvm)
         {
-            //List<FlightData> flightDetails = await GetFlightDetailsAsync()
+            var departureLocation = travelvm.Travel.DepartureLocation.ToString();
+            var destinationLocation = travelvm.Travel.DestinationLocation.ToString();
+            var departureDate = travelvm.Travel.DepartureDate.ToString("yyyy-MM-dd");
+            var destinationDate = travelvm.Travel.DestinationDate.ToString("yyyy-MM-dd");
+            var adultsCount = travelvm.Travel.Adults_count.ToString();
+            var childrenCount = travelvm.Travel.Childerns_count.ToString();
+            var maxPrice = travelvm.MaxPrice.ToString();
+            var maxCount = travelvm.MaxCount.ToString();
+            var currencyCode = travelvm.CurrencyCode.ToString();
+            var travelClass = travelvm.Class.ToString();
+            bool nonStop = travelvm.NonStop;
 
-            return View(travel);
+            // Call GetFlightDetailsAsync with parameters
+            List<FlightData> flightDetails = await GetFlightDetailsAsync(
+                departureLocation,
+                destinationLocation,
+                departureDate,
+                destinationDate,
+                int.Parse(adultsCount),
+                int.Parse(childrenCount),
+                travelClass,
+                nonStop,
+                currencyCode,
+                double.Parse(maxPrice),
+                int.Parse(maxCount)
+            );
+
+            return View(flightDetails);
         }
         private async Task<List<AirportDetails>> GetAirportDtlsAsync()
         {
@@ -114,17 +139,20 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
         //}
 
         private async Task<List<FlightData>> GetFlightDetailsAsync(string originLocCode, string destinationLocCode, string depDate, string returnDate, int adults, int children, 
-                                                                   string travelClass, bool nonStop, string currencyCode,string maxPrice,string maxCount)
+                                                                   string travelClass, bool nonStop, string currencyCode,double maxPrice,int maxCount)
         {
             string baseUrl = _apiRepository.GetFlightApiUrl();
             string apiKey = _apiRepository.GetFlightApiKey();
 
-            string formattedUrl = string.Format(baseUrl, originLocCode, destinationLocCode, depDate, returnDate, adults, children, travelClass, nonStop, currencyCode, maxPrice, maxCount);
+            string formattedUrl = string.Format(baseUrl,originLocCode,destinationLocCode,depDate,returnDate,adults,children,travelClass, nonStop.ToString().ToLower(), currencyCode,maxPrice,maxCount
+     );
 
             using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Clear();
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+                //client.DefaultRequestHeaders.Add("X-API-Key", "69LPLStrOd6oQWMhhzqmvyTUNrg88TyS");
+                //client.DefaultRequestHeaders.Add("X-API-Secret", "Kae8dxxOypIRDbRL");
 
                 HttpResponseMessage response = await client.GetAsync(formattedUrl);
 

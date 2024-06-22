@@ -43,22 +43,22 @@
                     </div>
                     <div style="margin-left:50px;" class="form-group>
                         <label for="adultsInput">Adults:</label>
-                        <input style="width: 100px;" type="number" asp-for="Travel.Adults_count" class="form-control" id="adultsInput" name="Travel.Adults" min="0" />
+                        <input style="width: 100px;" type="number" asp-for="Travel.Adults_count" class="form-control" id="adultsInput" name="Travel.Adults_count" min="0" />
                     </div>
                     <div style="margin-left:50px" class="form-group>
                         <label for="childrenInput">Children:</label>
-                        <input style="width: 100px;" type="number" asp-for="Travel.Childerns_count" class="form-control" id="childrenInput" name="Travel.Children" min="0" />
+                        <input style="width: 100px;" type="number" asp-for="Travel.Childerns_count" class="form-control" id="childrenInput" name="Travel.Childerns_count" min="0" />
                     </div>
                 </div>
 
                 <div style="margin-top:15px" class="form-row">
                     <div class="form-group>
                         <label for="startDateInput">Depart On:</label>
-                        <input style="width: 220px;" type="datetime-local" asp-for="Travel.DepartureDate" class="form-control" id="startDateInput" name="Travel.DepartureDate" />
+                        <input style="width: 220px;" type="date" asp-for="Travel.DepartureDate" class="form-control" id="startDateInput" name="Travel.DepartureDate" />
                     </div>
                     <div style="margin-left:30px" class="form-group>
                         <label for="endDateInput">Return On:</label>
-                        <input style="width: 220px;" type="datetime-local" asp-for="Travel.DestinationDate" class="form-control" id="endDateInput" name="Travel.DestinationDate" placeholder="Return On" />
+                        <input style="width: 220px;" type="date" asp-for="Travel.DestinationDate" class="form-control" id="endDateInput" name="Travel.DestinationDate" placeholder="Return On" />
                     </div>
                     <div style="margin-left:30px" class="form-group>
                         <label for="CurrencyCodeDropdown">Currency :</label>
