@@ -1,4 +1,4 @@
-﻿@model Travel
+﻿@model TravelVM
 
 <!DOCTYPE html>
 <html>
@@ -7,45 +7,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Booking Page</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
-    <style>
-        .booking-form {
-            background-color: #f5f5f5;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .form-group-inline {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .submit-btn {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-        }
-    </style>
+    <link rel="stylesheet" href="/css/Travel/Index.css">
 </head>
 <body>
-    @{
-        var categoryName = ViewBag.Category;
-    }
     <div class="container mt-5">
         <div class="booking-form">
-            <h6 style="margin-top: -50px;"><a asp-controller="Home" asp-action="Index" style="text-decoration: none; color: deepskyblue;">ExpressCart</a> > @(categoryName?.ToUpper())</h6>
+            <h6 style="margin-top: -50px;"><a asp-controller="Home" asp-action="Index" style="text-decoration: none; color: deepskyblue;">ExpressCart</a> > @Model.CategoryName.ToUpper()</h6>
             <h2>Book Your Trip</h2>
             <form method="post">
-                <input type="hidden" name="Id" value="@Model.Id" />
-                <input type="hidden" name="CategoryId" value="@ViewBag.CategoryId" />
+                <input type="hidden" asp-for="Travel.Id" />
+                <input type="hidden" asp-for="CategoryId" />
 
                 <div class="form-row">
                     <div class="form-group col-md-6">
                         <label for="fromDropdown">From:</label>
-                        <select id="fromDropdown" name="DepartureLocation" class="form-control">
+                        <select id="fromDropdown" asp-for="Travel.DepartureLocation" class="form-control">
                             <option value="" disabled selected>Where From?</option>
-                            @foreach (var airport in ViewBag.AirportData)
+                            @foreach (var airport in Model.AirportData)
                             {
                                 <option value="@airport.Code">@airport.Name</option>
                             }
@@ -53,25 +31,27 @@
                     </div>
                     <div class="form-group col-md-6">
                         <label for="toDropdown">To:</label>
-                        <select id="toDropdown" name="DestinationLocation" class="form-control">
+                        <select id="toDropdown" asp-for="Travel.DestinationLocation" class="form-control">
                             <option value="" disabled selected>Where To?</option>
-                            @foreach (var airport in ViewBag.AirportData)
+                            @foreach (var airport in Model.AirportData)
                             {
                                 <option value="@airport.Code">@airport.Name</option>
                             }
                         </select>
                     </div>
                 </div>
-                <label for="DatesDropdown">Depart On:</label>
-                <label style="margin-left:450px" for="DatesDropdown">Return On:</label>
+
                 <div class="form-row">
                     <div class="form-group col-md-6">
-                        <input type="date" id="startDateInput" name="DepartureDate" class="form-control" placeholder="Start Date" min="@DateTime.Now.ToString("yyyy-MM-dd")" onclick="this.showPicker()" />
+                        <label for="startDateInput">Departure Date:</label>
+                        <input type="datetime-local" asp-for="Travel.DepartureDate" class="form-control" id="startDateInput" name="Travel.DepartureDate" />
                     </div>
                     <div class="form-group col-md-6">
-                        <input type="date" id="endDateInput" name="DestinationDate" class="form-control" placeholder="End Date" onclick="this.showPicker()" />
+                        <label for="endDateInput">Destination Date:</label>
+                        <input type="datetime-local" asp-for="Travel.DestinationDate" class="form-control" id="endDateInput" name="Travel.DestinationDate" />
                     </div>
                 </div>
+
                 <div class="submit-btn">
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </div>
@@ -94,7 +74,6 @@
                 endDateInput.disabled = true;
             }
 
-            // Check if the selected return date is before the departure date
             var endDate = new Date(document.getElementById('endDateInput').value);
             if (endDate < startDate) {
                 document.getElementById('endDateInput').value = "";
@@ -105,7 +84,6 @@
             var endDate = new Date(this.value);
             var startDate = new Date(document.getElementById('startDateInput').value);
 
-            // Check if the selected return date is before the departure date
             if (endDate < startDate) {
                 this.value = "";
             }

@@ -9,8 +9,11 @@ namespace ExpressCart.Models.ViewModels
 {
 	public class TravelVM
 	{
+        public int CategoryId { get; set; }
+        public string CategoryName { get; set; }
+        public List<AirportDetails> AirportData { get; set; }
+        public string RandomAirportCode { get; set; }
+        public string RandomAirportName { get; set; }
         public Travel Travel { get; set; }
-		public int SelectedCityId { get; set; }
-		public IEnumerable<SelectListItem> CityList { get; set; }
-	}
+    }
 }

@@ -21,7 +21,6 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAPIRepository _apiRepository;
         private readonly HttpClient client;
-
         private string GetUserId()
         {
             if (User.Identity.IsAuthenticated)
@@ -39,22 +38,26 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
         public async Task<IActionResult> Index(int categoryId)
         {
             var category = _unitOfWork.Category.Get(u => u.Id == categoryId);
-            ViewBag.Category = category.Name;
-            ViewBag.CategoryId = categoryId;
 
             List<AirportDetails> airportData = await GetAirportDtlsAsync();
-            ViewBag.AirportData = airportData;
 
             // Select a random airport
             var random = new Random();
             int index = random.Next(airportData.Count);
             var randomAirport = airportData[index];
-            ViewBag.RandomAirportCode = randomAirport.Code;
-            ViewBag.RandomAirportName = randomAirport.Name;
 
-            return View(new Travel());
-        }
+            var travelvm = new TravelVM
+            {
+                CategoryId = categoryId,
+                CategoryName = category.Name,
+                AirportData = airportData,
+                RandomAirportCode = randomAirport.Code,
+                RandomAirportName = randomAirport.Name,
+                Travel = new Travel()
+            };
 
+            return View(travelvm);
+        } 
         [HttpPost]
         public IActionResult Index(Travel travel)
         {
@@ -71,9 +74,8 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
                 TempData["success"] = "Travel details updated successfully.";
             }
             _unitOfWork.Save();
-            return RedirectToAction("Index");
+            return RedirectToAction("Index","Home");
         }
-
         private async Task<List<AirportDetails>> GetAirportDtlsAsync()
         {
             return await Task.FromResult(new List<AirportDetails>
@@ -84,11 +86,9 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
             });
         }
 
-
-
         //private async Task<List<AirportDetails>> GetAirportDtls()
         //{
-        //    using (var client = new HttpClient())
+        //    using (var client = new HttpClient()) //A HttpClient object is created inside a using statement to ensure it is properly disposed of after use.
         //    {
         //        string countryAPIUrl = _apiRepository.GetCountryApiUrl();
         //        string apiKey = _apiRepository.GetCountryApiKey();

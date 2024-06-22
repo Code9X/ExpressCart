@@ -7,16 +7,20 @@ using System.Threading.Tasks;
 
 namespace ExpressCart.Models
 {
-	public class Travel
-	{
-		[Key]
-		public int Id { get; set; }
+    public class Travel
+    {
+        [Key]
+        public int Id { get; set; }
         public string UserId { get; set; }
         public string DepartureLocation { get; set; }
+        [DataType(DataType.Date)]
         public DateTime DepartureDate { get; set; }
         public string DestinationLocation { get; set; }
-		public DateTime DestinationDate { get; set; }
-	}
+        [DataType(DataType.Date)]
+        public DateTime DestinationDate { get; set; }
+        public int Adults_count { get; set; }
+        public int Childerns_count { get; set; }
+    }
     public class AirportDetails
     {
         public string Code { get; set; }
