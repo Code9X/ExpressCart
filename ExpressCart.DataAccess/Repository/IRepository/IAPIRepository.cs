@@ -15,5 +15,6 @@ namespace ExpressCart.DataAccess.Repository.IRepository
         string GetCountryApiKey();
         string GetFlightApiUrl();
         string GetFlightApiKey();
+        string GetFlightAPISecret();
     }
 }

@@ -45,5 +45,10 @@ namespace ExpressCart.DataAccess.Repository
         {
             return _apiConfig.FlightAPI.ApiKey;
         }
+
+        public string GetFlightAPISecret()
+        {
+            return _apiConfig.FlightAPI.APISecret;
+        }
     }
 }

@@ -62,32 +62,19 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
         [HttpPost]
         public async Task<IActionResult> Index(TravelVM travelvm)
         {
-            var departureLocation = travelvm.Travel.DepartureLocation.ToString();
-            var destinationLocation = travelvm.Travel.DestinationLocation.ToString();
-            var departureDate = travelvm.Travel.DepartureDate.ToString("yyyy-MM-dd");
-            var destinationDate = travelvm.Travel.DestinationDate.ToString("yyyy-MM-dd");
-            var adultsCount = travelvm.Travel.Adults_count.ToString();
-            var childrenCount = travelvm.Travel.Childerns_count.ToString();
-            var maxPrice = travelvm.MaxPrice.ToString();
-            var maxCount = travelvm.MaxCount.ToString();
-            var currencyCode = travelvm.CurrencyCode.ToString();
+            var depLoc = travelvm.Travel.DepartureLocation.ToString();
+            var destLoc = travelvm.Travel.DestinationLocation.ToString();
+            var depDate = travelvm.Travel.DepartureDate.ToString("yyyy-MM-dd");
+            var destDate = travelvm.Travel.DestinationDate.ToString("yyyy-MM-dd");
+            int adults = travelvm.Travel.Adults_count;
+            int childrens = travelvm.Travel.Childerns_count;
+            double maxPrice = travelvm.MaxPrice;
+            int maxCount = travelvm.MaxCount;
+            var currCode = travelvm.CurrencyCode.ToString();
             var travelClass = travelvm.Class.ToString();
             bool nonStop = travelvm.NonStop;
 
-            // Call GetFlightDetailsAsync with parameters
-            List<FlightData> flightDetails = await GetFlightDetailsAsync(
-                departureLocation,
-                destinationLocation,
-                departureDate,
-                destinationDate,
-                int.Parse(adultsCount),
-                int.Parse(childrenCount),
-                travelClass,
-                nonStop,
-                currencyCode,
-                double.Parse(maxPrice),
-                int.Parse(maxCount)
-            );
+            List<FlightData> flightDetails = await GetFlightDetailsAsync(depLoc, destLoc, depDate, destDate, adults, childrens, travelClass,nonStop, currCode,maxPrice,maxCount);
 
             return View(flightDetails);
         }
@@ -95,64 +82,27 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
         {
             return await Task.FromResult(new List<AirportDetails>
             {
+                new AirportDetails { Code = "COK", Name = "Cochin International Airport" },
+                new AirportDetails { Code = "BKK", Name = "Bangkok International Airport" },
+                new AirportDetails { Code = "DXB", Name = "Dubai International Airport" },
                 new AirportDetails { Code = "JFK", Name = "John F. Kennedy International Airport" },
                 new AirportDetails { Code = "LAX", Name = "Los Angeles International Airport" },
                 new AirportDetails { Code = "ORD", Name = "O'Hare International Airport" }
             });
         }
 
-        //private async Task<List<AirportDetails>> GetAirportDtls()
-        //{
-        //    using (var client = new HttpClient()) //A HttpClient object is created inside a using statement to ensure it is properly disposed of after use.
-        //    {
-        //        string countryAPIUrl = _apiRepository.GetCountryApiUrl();
-        //        string apiKey = _apiRepository.GetCountryApiKey();
-
-        //        client.DefaultRequestHeaders.Clear();
-        //        client.DefaultRequestHeaders.Add("x-rapidapi-key", apiKey);
-        //        client.DefaultRequestHeaders.Add("x-rapidapi-host", "booking-com15.p.rapidapi.com");
-
-        //        HttpResponseMessage response = await client.GetAsync(countryAPIUrl);
-
-        //        if (response.IsSuccessStatusCode)
-        //        {
-        //            string json = await response.Content.ReadAsStringAsync();
-        //            dynamic jsonResponse = JsonConvert.DeserializeObject(json);
-
-        //            List<AirportDetails> airports = new List<AirportDetails>();
-
-        //            foreach (var item in jsonResponse.data)
-        //            {
-        //                airports.Add(new AirportDetails
-        //                {
-        //                    // Concatenating city name and code
-        //                    Code = (string)item.cityName,
-        //                    Name = $"{(string)item.name} - {(string)item.code}"
-        //                });
-        //            }
-
-        //            return airports;
-        //        }
-
-        //        return new List<AirportDetails>();
-        //    }
-        //}
-
-        private async Task<List<FlightData>> GetFlightDetailsAsync(string originLocCode, string destinationLocCode, string depDate, string returnDate, int adults, int children, 
-                                                                   string travelClass, bool nonStop, string currencyCode,double maxPrice,int maxCount)
+        private async Task<List<FlightData>> GetFlightDetailsAsync(string depLoc, string destLoc, string depDate, string destDate, int adults, int childrens,string travelClass, bool nonStop, string currCode, double maxPrice,int maxCount)
         {
             string baseUrl = _apiRepository.GetFlightApiUrl();
-            string apiKey = _apiRepository.GetFlightApiKey();
+            string accessToken = await GetAccessTokenAsync();
 
-            string formattedUrl = string.Format(baseUrl,originLocCode,destinationLocCode,depDate,returnDate,adults,children,travelClass, nonStop.ToString().ToLower(), currencyCode,maxPrice,maxCount
+            string formattedUrl = string.Format(baseUrl, depLoc, destLoc, depDate, destDate, adults, childrens, travelClass, nonStop.ToString().ToLower(), currCode, maxPrice,maxCount
      );
 
             using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Clear();
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-                //client.DefaultRequestHeaders.Add("X-API-Key", "69LPLStrOd6oQWMhhzqmvyTUNrg88TyS");
-                //client.DefaultRequestHeaders.Add("X-API-Secret", "Kae8dxxOypIRDbRL");
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
                 HttpResponseMessage response = await client.GetAsync(formattedUrl);
 
@@ -173,8 +123,49 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
             }
         }
 
+        private async Task<string> GetAccessTokenAsync()
+        {
+            string clientId = _apiRepository.GetFlightApiKey();
+            string clientSecret = _apiRepository.GetFlightAPISecret();
+            string tokenUrl = "https://test.api.amadeus.com/v1/security/oauth2/token";
 
+            using (var client = new HttpClient())
+            {
+                var content = new FormUrlEncodedContent(new[]
+                {
+                    new KeyValuePair<string, string>("grant_type", "client_credentials"),
+                    new KeyValuePair<string, string>("client_id", clientId),
+                    new KeyValuePair<string, string>("client_secret", clientSecret)
+                });
+
+                HttpResponseMessage response = await client.PostAsync(tokenUrl, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string json = await response.Content.ReadAsStringAsync();
+                    var tokenResponse = JsonConvert.DeserializeObject<TokenResponse>(json);
+                    return tokenResponse.AccessToken;
+                }
+                else
+                {
+                    throw new Exception("Unable to retrieve access token.");
+                }
+            }
+        }
+
+        private class TokenResponse
+        {
+            [JsonProperty("access_token")]
+            public string AccessToken { get; set; }
+
+            [JsonProperty("expires_in")]
+            public int ExpiresIn { get; set; }
+
+            [JsonProperty("token_type")]
+            public string TokenType { get; set; }
+        }
     }
+
 
     public class Root
     {
