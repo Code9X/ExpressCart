@@ -58,7 +58,7 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
             };
 
             return View(travelvm);
-        } 
+        }
         [HttpPost]
         public async Task<IActionResult> Index(TravelVM travelvm)
         {
@@ -74,10 +74,51 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
             var travelClass = travelvm.Class.ToString();
             bool nonStop = travelvm.NonStop;
 
-            List<FlightData> flightDetails = await GetFlightDetailsAsync(depLoc, destLoc, depDate, destDate, adults, childrens, travelClass,nonStop, currCode,maxPrice,maxCount);
+            var root = await GetFlightDetailsAsync(depLoc, destLoc, depDate, destDate, adults, childrens, travelClass, nonStop, currCode, maxPrice, maxCount);
 
-            return View(flightDetails);
+            if (root.Dictionaries?.Carriers != null && root.Dictionaries?.Aircraft != null)
+            {
+                // Inject carrier and aircraft names into flight details
+                foreach (var flight in root.data)
+                {
+                    foreach (var itinerary in flight.Itineraries)
+                    {
+                        foreach (var segment in itinerary.Segments)
+                        {
+                            if (root.Dictionaries.Carriers.ContainsKey(segment.CarrierCode))
+                            {
+                                flight.CarrierName = root.Dictionaries.Carriers[segment.CarrierCode];
+                            }
+                            if (root.Dictionaries.Aircraft.ContainsKey(segment.Aircraft.Code))
+                            {
+                                flight.AircraftName = root.Dictionaries.Aircraft[segment.Aircraft.Code];
+                            }
+                        }
+                    }
+                }
+            }
+
+            travelvm.FlightDetails = root.data;
+
+            HttpContext.Session.SetString("travelvm", JsonConvert.SerializeObject(travelvm));
+
+            return RedirectToAction("FlightOverview");
         }
+
+        public IActionResult FlightOverview()
+        {
+            var travelvmJson = HttpContext.Session.GetString("travelvm");
+            if (string.IsNullOrEmpty(travelvmJson))
+            {
+                return RedirectToAction("Index");
+            }
+
+            var travelvm = JsonConvert.DeserializeObject<TravelVM>(travelvmJson);
+
+            return View(travelvm);
+        }
+
+
         private async Task<List<AirportDetails>> GetAirportDtlsAsync()
         {
             return await Task.FromResult(new List<AirportDetails>
@@ -91,13 +132,11 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
             });
         }
 
-        private async Task<List<FlightData>> GetFlightDetailsAsync(string depLoc, string destLoc, string depDate, string destDate, int adults, int childrens,string travelClass, bool nonStop, string currCode, double maxPrice,int maxCount)
+        private async Task<Root> GetFlightDetailsAsync(string depLoc, string destLoc, string depDate, string destDate, int adults, int children, string travelClass, bool nonStop, string currCode, double maxPrice, int maxCount)
         {
             string baseUrl = _apiRepository.GetFlightApiUrl();
             string accessToken = await GetAccessTokenAsync();
-
-            string formattedUrl = string.Format(baseUrl, depLoc, destLoc, depDate, destDate, adults, childrens, travelClass, nonStop.ToString().ToLower(), currCode, maxPrice,maxCount
-     );
+            string formattedUrl = GetFormattedURL(baseUrl, depLoc, destLoc, depDate, destDate, adults, children, travelClass, nonStop, currCode, maxPrice, maxCount);
 
             using (var client = new HttpClient())
             {
@@ -111,7 +150,7 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
                     string json = await response.Content.ReadAsStringAsync();
                     var root = JsonConvert.DeserializeObject<Root>(json);
 
-                    return root.Data;
+                    return root;
                 }
                 else
                 {
@@ -119,9 +158,10 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
                     TempData["success"] = message;
                 }
 
-                return new List<FlightData>();
+                return new Root();
             }
         }
+
 
         private async Task<string> GetAccessTokenAsync()
         {
@@ -164,124 +204,35 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
             [JsonProperty("token_type")]
             public string TokenType { get; set; }
         }
+
+        private string GetFormattedURL(string baseUrl, string depLoc, string destLoc, string depDate, string destDate, int adults, int children, string travelClass, bool nonStop, string currCode, double maxPrice, int maxCount)
+        {
+            try
+            {
+                string formattedUrl = string.Empty;
+                if (destDate == "0001-01-01") // If One Way is Selected
+                {
+                    string adjustedBaseUrl = baseUrl.Replace("&children={5}", "");
+
+                    formattedUrl = string.Format(adjustedBaseUrl, depLoc, destLoc, depDate, "", adults, children, travelClass, nonStop.ToString().ToLower(), currCode, maxPrice, maxCount);
+                    formattedUrl = formattedUrl.Replace("&returnDate=", "");
+                }
+                else // Round Trip
+                {
+                    string adjustedBaseUrl = baseUrl.Replace("&children={5}", "");
+
+                    formattedUrl = string.Format(adjustedBaseUrl, depLoc, destLoc, depDate, destDate, adults, children, travelClass, nonStop.ToString().ToLower(), currCode, maxPrice, maxCount);
+                }
+                return formattedUrl;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error formatting URL", ex);
+            }
+        }
+
+
+
+
     }
-
-
-    public class Root
-    {
-        public Meta Meta { get; set; }
-        public List<FlightData> Data { get; set; }
-    }
-
-    public class Meta
-    {
-        // Define properties according to the JSON structure
-    }
-
-    public class FlightData
-    {
-        public string Id { get; set; }
-        public string Source { get; set; }
-        public bool InstantTicketingRequired { get; set; }
-        public bool NonHomogeneous { get; set; }
-        public bool OneWay { get; set; }
-        public bool IsUpsellOffer { get; set; }
-        public DateTime LastTicketingDate { get; set; }
-        public int NumberOfBookableSeats { get; set; }
-        public List<Itinerary> Itineraries { get; set; }
-        public Price Price { get; set; }
-        public PricingOptions PricingOptions { get; set; }
-        public List<string> ValidatingAirlineCodes { get; set; }
-        public List<TravelerPricing> TravelerPricings { get; set; }
-    }
-
-    public class Itinerary
-    {
-        public string Duration { get; set; }
-        public List<Segment> Segments { get; set; }
-    }
-
-    public class Segment
-    {
-        public Departure Departure { get; set; }
-        public Arrival Arrival { get; set; }
-        public string CarrierCode { get; set; }
-        public string Number { get; set; }
-        public Aircraft Aircraft { get; set; }
-        public Operating Operating { get; set; }
-        public string Duration { get; set; }
-        public string Id { get; set; }
-        public int NumberOfStops { get; set; }
-        public bool BlacklistedInEU { get; set; }
-    }
-
-    public class Departure
-    {
-        public string IataCode { get; set; }
-        public string Terminal { get; set; }
-        public DateTime At { get; set; }
-    }
-
-    public class Arrival
-    {
-        public string IataCode { get; set; }
-        public DateTime At { get; set; }
-    }
-
-    public class Aircraft
-    {
-        public string Code { get; set; }
-    }
-
-    public class Operating
-    {
-        public string CarrierCode { get; set; }
-    }
-
-    public class Price
-    {
-        public string Currency { get; set; }
-        public string Total { get; set; }
-        public string Base { get; set; }
-        public List<Fee> Fees { get; set; }
-        public string GrandTotal { get; set; }
-    }
-
-    public class Fee
-    {
-        public string Amount { get; set; }
-        public string Type { get; set; }
-    }
-
-    public class PricingOptions
-    {
-        public List<string> FareType { get; set; }
-        public bool IncludedCheckedBagsOnly { get; set; }
-    }
-
-    public class TravelerPricing
-    {
-        public string TravelerId { get; set; }
-        public string FareOption { get; set; }
-        public string TravelerType { get; set; }
-        public Price Price { get; set; }
-        public List<FareDetailsBySegment> FareDetailsBySegment { get; set; }
-    }
-
-    public class FareDetailsBySegment
-    {
-        public string SegmentId { get; set; }
-        public string Cabin { get; set; }
-        public string FareBasis { get; set; }
-        public string Class { get; set; }
-        public IncludedCheckedBags IncludedCheckedBags { get; set; }
-    }
-
-    public class IncludedCheckedBags
-    {
-        public int Weight { get; set; }
-        public string WeightUnit { get; set; }
-    }
-
-
 }
