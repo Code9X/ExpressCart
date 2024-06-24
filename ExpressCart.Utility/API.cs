@@ -31,6 +31,7 @@ namespace ExpressCart.Utility
         public string Url { get; set; }
         public string ApiKey { get; set; }
         public string APISecret { get; set; }
+        public string CityUrl { get; set; }
     }
 
 }

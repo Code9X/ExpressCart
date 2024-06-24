@@ -1,4 +1,5 @@
 ﻿using System.Threading;
+using Newtonsoft.Json;
 
 namespace ExpressCart.Models.ViewModels
 {
@@ -6,7 +7,7 @@ namespace ExpressCart.Models.ViewModels
     {
         public int CategoryId { get; set; }
         public string CategoryName { get; set; }
-        public List<AirportDetails> AirportData { get; set; }
+        //public List<AirportDetails> AirportData { get; set; }
         public string RandomAirportCode { get; set; }
         public string RandomAirportName { get; set; }
         public Travel Travel { get; set; }
@@ -149,5 +150,17 @@ namespace ExpressCart.Models.ViewModels
         public string CountryCode { get; set; }
     }
     #endregion
+
+    public class TokenResponse
+    {
+        [JsonProperty("access_token")]
+        public string AccessToken { get; set; }
+
+        [JsonProperty("expires_in")]
+        public int ExpiresIn { get; set; }
+
+        [JsonProperty("token_type")]
+        public string TokenType { get; set; }
+    }
 
 }

@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Logs\" />
     <Folder Include="wwwroot\images\advertisements\" />
     <Folder Include="wwwroot\images\categories\" />
     <Folder Include="wwwroot\images\products\" />

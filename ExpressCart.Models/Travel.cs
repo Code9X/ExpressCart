@@ -21,7 +21,7 @@ namespace ExpressCart.Models
         public int Adults_count { get; set; }
         public int Childerns_count { get; set; }
     }
-    public class AirportDetails
+    public class CityAndAirport
     {
         public string Code { get; set; }
         public string Name { get; set; }

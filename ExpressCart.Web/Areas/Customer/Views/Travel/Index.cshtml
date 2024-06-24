@@ -47,23 +47,18 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="fromDropdown">From:</label>
-                        <select style="width: 350px;" id="fromDropdown" asp-for="Travel.DepartureLocation" class="form-control">
-                            <option value="" disabled selected>Where From?</option>
-                            @foreach (var airport in Model.AirportData)
-                            {
-                                <option value="@airport.Code">@airport.Name</option>
-                            }
+                        <label for="fromInput">From:</label>
+                        <input asp-for="Travel.DepartureLocation" type=" text" id="fromInput" class="form-control" placeholder="Where From?" onkeyup="fetchAirportDetails('from')">
+                        <select style="width: 350px;" id="fromDropdown" class="form-control">
+                            <option value="" disabled selected>Select a location</option>
                         </select>
                     </div>
+
                     <div style="margin-left:50px" class="form-group">
-                        <label for="toDropdown">To:</label>
-                        <select style="width: 350px;" id="toDropdown" asp-for="Travel.DestinationLocation" class="form-control">
-                            <option value="" disabled selected>Where To?</option>
-                            @foreach (var airport in Model.AirportData)
-                            {
-                                <option value="@airport.Code">@airport.Name</option>
-                            }
+                        <label for="toInput">To:</label>
+                        <input asp-for="Travel.DestinationLocation" type="text" id="toInput" class="form-control" placeholder="Where To?" onkeyup="fetchAirportDetails('to')">
+                        <select style="width: 350px;" id="toDropdown" class="form-control">
+                            <option value="" disabled selected>Select a location</option>
                         </select>
                     </div>
                     <div style="margin-left:50px;" class="form-group">
@@ -161,6 +156,37 @@
                 }
             });
         });
+
+        async function fetchAirportDetails(type) {
+            const keywordInput = type === 'from' ? document.getElementById("fromInput") : document.getElementById("toInput");
+            const dropdown = type === 'from' ? document.getElementById("fromDropdown") : document.getElementById("toDropdown");
+
+            const keyword = keywordInput.value.trim();
+
+            if (keyword.length > 0) {
+                const response = await fetch(`/Customer/Travel/GetAirportDetails?keyword=${keyword}`);
+                if (response.ok) {
+                    const data = await response.json();
+
+                    dropdown.innerHTML = '<option value="" disabled selected>Select a location</option>';
+
+                    data.forEach(airport => {
+                        const option = document.createElement("option");
+                        option.value = airport.code;
+                        option.textContent = `${airport.name} (${airport.code})`;
+                        dropdown.appendChild(option);
+                    });
+
+                    dropdown.addEventListener('change', function () {
+                        const selectedOption = this.options[this.selectedIndex];
+                        keywordInput.value = selectedOption.value; // Use value instead of text
+                    });
+
+                } else {
+                    console.error("Failed to fetch airport details");
+                }
+            }
+        }
     </script>
 </body>
 </html>

@@ -26,16 +26,6 @@ namespace ExpressCart.DataAccess.Repository
             return _apiConfig.RazorAPI.PublishableKey;
         }
 
-        public string GetCountryApiUrl()
-        {
-            return _apiConfig.CountryAPI.countryApiUrl;
-        }
-
-        public string GetCountryApiKey()
-        {
-            return _apiConfig.CountryAPI.ApiKey;
-        }
-
         public string GetFlightApiUrl()
         {
             return _apiConfig.FlightAPI.Url;
@@ -49,6 +39,11 @@ namespace ExpressCart.DataAccess.Repository
         public string GetFlightAPISecret()
         {
             return _apiConfig.FlightAPI.APISecret;
+        }
+
+        public string GetCityApiUrl()
+        {
+            return _apiConfig.FlightAPI.CityUrl;
         }
     }
 }
