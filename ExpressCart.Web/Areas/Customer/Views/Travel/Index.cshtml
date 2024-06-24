@@ -173,7 +173,7 @@
                     data.forEach(airport => {
                         const option = document.createElement("option");
                         option.value = airport.code;
-                        option.textContent = `${airport.name} (${airport.code})`;
+                        option.textContent = `${airport.name} (${airport.detailedName})`; 
                         dropdown.appendChild(option);
                     });
 

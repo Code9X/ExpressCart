@@ -127,7 +127,8 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
                             cityAndAirports.Add(new CityAndAirport
                             {
                                 Code = item.iataCode,
-                                Name = item.address.cityName
+                                Name = item.address.cityName,
+                                DetailedName = item.detailedName
                             });
                         }
                     }
