@@ -53,19 +53,19 @@
                             <option value="" disabled selected>Select a location</option>
                         </select>
                     </div>
-
-                    <div style="margin-left:50px" class="form-group">
+                    <h3 style="margin-top:45px;margin-left:20px">⇄</h3>
+                    <div style="margin-left:30px" class="form-group">
                         <label for="toInput">To:</label>
                         <input asp-for="Travel.DestinationLocation" type="text" id="toInput" class="form-control" placeholder="Where To?" onkeyup="fetchAirportDetails('to')">
                         <select style="width: 350px;" id="toDropdown" class="form-control">
                             <option value="" disabled selected>Select a location</option>
                         </select>
                     </div>
-                    <div style="margin-left:50px;" class="form-group">
+                    <div style="margin-left:30px;" class="form-group">
                         <label for="adultsInput">Adults:</label>
                         <input style="width: 100px;" type="number" asp-for="Travel.Adults_count" class="form-control" id="adultsInput" name="Travel.Adults_count" min="0" value="1" />
                     </div>
-                    <div style="margin-left:50px" class="form-group">
+                    <div style="margin-left:30px" class="form-group">
                         <label for="childrenInput">Children:</label>
                         <input style="width: 100px;" type="number" asp-for="Travel.Childerns_count" class="form-control" id="childrenInput" name="Travel.Childerns_count" min="0" />
                     </div>

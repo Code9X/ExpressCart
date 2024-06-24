@@ -1,138 +1,158 @@
 ﻿@model TravelVM
 
-@foreach (var flight in Model.FlightDetails)
-{
-    <div class="flight-card">
-        <div class="flight-details">
-            <div class="flight-header">
-                <div  class="flight-info">
-                    <span class="card-title">@flight.CarrierName |@flight.Itineraries.First().Segments.First().CarrierCode-@flight.Itineraries.First().Segments.First().Number</span>
-                    <h6>Code : @flight.Itineraries.First().Segments.First().Aircraft.Code</h6>
-                </div>
-            </div>
-            <div style="margin-top:-70px;margin-left:300px" class="flight-schedule">
-                <div class="schedule-item">
-                    <span class="iata-code">@flight.Itineraries.First().Segments.First().Departure.IataCode</span>
-                    <span class="time">@flight.Itineraries.First().Segments.First().Departure.At.ToString("HH:mm")</span>
-                </div>
-                <div class="duration">
-                    <span>@flight.Itineraries.First().Duration</span>
-                    <div class="non-stop">
-                        <span>@(flight.Itineraries.First().Segments.First().NumberOfStops == 0 ? "Non stop" : "Stop")</span>
-                    </div>
-                </div>
-                <div class="schedule-item">
-                    <span class="iata-code">@flight.Itineraries.First().Segments.First().Arrival.IataCode</span>
-                    <span class="time">@flight.Itineraries.First().Segments.First().Arrival.At.ToString("HH:mm")</span>
-                    <span class="next-day">@flight.Itineraries.First().Segments.First().Arrival.At.Date > flight.Itineraries.First().Segments.First().Departure.At.Date ? "+1D" : ""</span>
-                </div>
-            </div>
-            <div class="flight-meta">
-                <p><strong>Class:</strong> @flight.TravelerPricings.First().FareDetailsBySegment.First().Cabin</p>
-                <p><strong>Aircraft:</strong> @flight.AircraftName (@flight.Itineraries.First().Segments.First().Aircraft.Code)</p>
-                <p><strong>Price:</strong> @flight.Price.Currency @flight.Price.GrandTotal</p>
-            </div>
-        </div>
-    </div>
-}
+<div class="container-fluid">
+	<div class="row">
+		<!-- Filter Card -->
+		<div class="col-lg-3">
+			<div class="filter-card">
+				<span>Filter</span>
+			</div>
+		</div>
+		<!-- Flight Cards -->
+		<div class="col-lg-9">
+			@foreach (var flight in Model.FlightDetails)
+			{
+				<div class="flight-card">
+					<div class="flight-details">
+						<div class="flight-header">
+							<div class="flight-info">
+								<h6><strong>@flight.CarrierName |@flight.Itineraries.First().Segments.First().CarrierCode-@flight.Itineraries.First().Segments.First().Number</strong></h6>
+								<h6>Code : @flight.Itineraries.First().Segments.First().Aircraft.Code</h6>
+								<p><strong>Class:</strong> @flight.TravelerPricings.First().FareDetailsBySegment.First().Cabin</p>
+							</div>
+						</div>
+						<div style="margin-top:-110px;margin-left:270px" class="flight-schedule">
+							<div class="schedule-item">
+								<span class="iata-code">@flight.Itineraries.First().Segments.First().Departure.IataCode</span>
+								<span style="margin-top:20px"></span>
+								<span class="time">@flight.Itineraries.First().Segments.First().Departure.At.ToString("HH:mm")</span>
+							</div>
+							<div style="margin-left:-80px" class="duration">
+								<span>@flight.Itineraries.First().Duration</span>
+								<span>--------</span>
+								<div class="non-stop">
+									<span>@(flight.Itineraries.First().Segments.First().NumberOfStops == 0 ? "Non stop" : "Stop")</span>
+								</div>
+							</div>
+							<div style="margin-left:-80px" class="schedule-item">
+								<span class="iata-code">@flight.Itineraries.First().Segments.First().Arrival.IataCode</span>
+								<span class="time">@flight.Itineraries.First().Segments.First().Arrival.At.ToString("HH:mm")</span>
+							</div>
+							<div style="margin-top:-75px;margin-left:100px" class="flight-meta">
+								@if (@flight.Price.Currency == "INR")
+								{
+									<p>₹ @flight.Price.GrandTotal</p>
+								}
+								@if (@flight.Price.Currency == "USD")
+								{
+									<p>$ @flight.Price.GrandTotal</p>
+								}
+							</div>
+						</div>
+					</div>
+				</div>
+			}
+		</div>
+	</div>
+</div>
 
 <style>
-    .flight-card {
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        margin: 10px 0;
-        padding: 15px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        display: flex;
-        flex-direction: column;
-    }
+	.flight-card {
+		border: 1px solid #ddd;
+		border-radius: 5px;
+		margin: 10px 0;
+		padding: 15px;
+		box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+		display: flex;
+		flex-direction: column;
+	}
 
-    .flight-details {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-    }
+	.flight-details {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+	}
 
-    .flight-header {
-        display: flex;
-        align-items: center;
-        margin-bottom: 10px;
-    }
+	.flight-header {
+		display: flex;
+		align-items: center;
+		margin-bottom: 10px;
+	}
 
-    .flight-logo {
-        position: relative;
-        width: 50px;
-        height: 50px;
-        margin-right: 15px;
-    }
+	.flight-logo {
+		position: relative;
+		width: 50px;
+		height: 50px;
+		margin-right: 15px;
+	}
 
-    .flight-logo-main, .flight-logo-small {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-    }
+	.flight-logo-main, .flight-logo-small {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+	}
 
-    .flight-logo-small {
-        width: 25px;
-        height: 25px;
-        top: auto;
-        left: auto;
-        bottom: 0;
-        right: 0;
-    }
+	.flight-logo-small {
+		width: 25px;
+		height: 25px;
+		top: auto;
+		left: auto;
+		bottom: 0;
+		right: 0;
+	}
 
-    .flight-info span {
-        font-size: 1.25rem;
-        font-weight: bold;
-    }
+	.flight-info span {
+		font-size: 1.25rem;
+		font-weight: bold;
+	}
 
-    .flight-schedule {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 10px;
-    }
+	.flight-schedule {
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: 10px;
+	}
 
-    .schedule-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
+	.schedule-item {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
 
-    .iata-code {
-        font-size: 1.2rem;
-        font-weight: bold;
-    }
+	.iata-code {
+		font-size: 1.2rem;
+		font-weight: bold;
+	}
 
-    .time {
-        font-size: 1rem;
-        color: #555;
-    }
+	.time {
+		font-size: 1rem;
+		color: #555;
+	}
 
-    .duration {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
+	.duration {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
 
-    .non-stop span {
-        font-size: 0.9rem;
-        color: #555;
-    }
+	.non-stop span {
+		font-size: 0.9rem;
+		color: #555;
+	}
 
-    .next-day {
-        font-size: 0.9rem;
-        color: #d00;
-    }
+	.next-day {
+		font-size: 0.9rem;
+		color: #d00;
+	}
 
-    .flight-meta {
-        margin-top: 10px;
-        font-size: 1rem;
-        line-height: 1.5;
-    }
+	.flight-meta {
+		margin-top: 10px;
+		font-size: 1rem;
+		line-height: 1.5;
+	}
 
-        .flight-meta p {
-            margin: 5px 0;
-        }
+		.flight-meta p {
+			margin: 5px 0;
+		}
 </style>
