@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace ExpressCart.Models.ViewModels
 {
-    public class TravelVM
+    public class TravelVM   
     {
         public int CategoryId { get; set; }
         public string CategoryName { get; set; }
@@ -18,6 +18,7 @@ namespace ExpressCart.Models.ViewModels
         public int MaxCount { get; set; }
         public int Type { get; set; }
         public List<FlightData> FlightDetails { get; set; }
+        public FlightData SelectedFlight { get; set; }
     }
 
     public class Root
@@ -76,6 +77,7 @@ namespace ExpressCart.Models.ViewModels
     public class Arrival
     {
         public string IataCode { get; set; }
+        public string Terminal { get; set; }
         public DateTime At { get; set; }
     }
 

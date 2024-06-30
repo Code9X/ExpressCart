@@ -1,0 +1,125 @@
+﻿@model TravelVM
+
+<div style="text-align: center;">
+    <h2>Flight Details</h2>
+    <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+        <h6>@Model.SelectedFlight.CarrierName |</h6>
+        <h6 style="margin-left: 10px;">@Model.SelectedFlight.AircraftName</h6>
+    </div>
+</div>
+
+@if (Model.SelectedFlight.Itineraries.Count == 1) //One Way Trip
+{
+    <div style="text-align: left;">
+        <h3>Flight to @Model.SelectedFlight.Itineraries[0].Segments.Last().Arrival.IataCode</h3>
+        <p>@Model.SelectedFlight.Itineraries[0].Segments.Count() stops · @Model.SelectedFlight.Itineraries[0].Duration.Replace("PT", "").Replace("H", "h ").Replace("M", "m")</p>
+
+        @foreach (var segment in Model.SelectedFlight.Itineraries[0].Segments)
+        {
+            <div style="margin-bottom: 20px;">
+                <div style="display: flex; align-items: center;">
+                    <div style="width: 10px; height: 10px; border: 2px solid black; border-radius: 50%; margin-right: 10px;"></div>
+                    <p style="margin: 0;"> @segment.Departure.At.ToString("ddd d MMM") · @segment.Departure.At.ToString("HH:mm")</p>
+                </div>
+                <div style="display: flex; align-items: center; margin-left: 4px;">
+                    <div style="width: 1px; height: 30px; background-color: black; margin-right: 15px;"></div>
+                    <p style="margin: 0;"><strong>@segment.Departure.IataCode · Terminal: @(string.IsNullOrWhiteSpace(segment.Departure.Terminal) ? "1" : segment.Departure.Terminal)</strong></p>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <div style="width: 10px; height: 10px; border: 2px solid black; border-radius: 50%; margin-right: 10px;"></div>
+                    <p style="margin: 0;">@segment.Arrival.At.ToString("ddd d MMM") · @segment.Arrival.At.ToString("HH:mm")</p>
+                </div>
+                <div style="display: flex; align-items: center; margin-left: 4px;">
+                    <div style="width: 1px; height: 30px; background-color: black; margin-right: 15px;"></div>
+                    <p style="margin: 0;"><strong>@segment.Arrival.IataCode · Terminal: @(string.IsNullOrWhiteSpace(segment.Arrival.Terminal) ? "1" : segment.Arrival.Terminal)</strong></p>
+
+                </div>
+
+                <div style="margin-top: -110px; margin-left: 300px;">
+                    <div style="display: flex; align-items: center;">
+                        <p style="margin: 0;">@segment.CarrierCode</p>
+                        <span style="margin: 0 10px;">|</span>
+                        <p style="margin: 0;">@segment.CarrierCode</p>
+                    </div>
+                    <p style="margin: 0;">@segment.Number · Economy</p>
+                    <p style="margin: 0;">Flight time : @segment.Duration.Replace("PT", "").Replace("H", "h ").Replace("M", "m")</p>
+                </div>
+
+
+                <div style="margin-top:50px; margin-left: 4px;">
+                @if (segment != Model.SelectedFlight.Itineraries[0].Segments.Last())
+                {
+                    <div style="width: 1px; height: 30px; border-right: 2px dotted black; margin-right: 15px;"></div>
+                    var nextSegment = Model.SelectedFlight.Itineraries[0].Segments.ElementAt(Model.SelectedFlight.Itineraries[0].Segments.IndexOf(segment) + 1);
+                    var layoverDuration = nextSegment.Departure.At - segment.Arrival.At;
+                        <p style="margin-top:-30px;margin-left: 15px;">Layover : @layoverDuration.Hours hours @layoverDuration.Minutes minutes</p>
+                }
+                </div>
+            </div>
+        }
+    </div>
+}
+else if (Model.SelectedFlight.Itineraries.Count >= 2)
+{
+    <div style="text-align: left;">
+        <h3>Round Trip Flight</h3>  
+
+        <div style="margin-bottom: 20px;">
+            <h4>Departure</h4>
+            <p>@Model.SelectedFlight.Itineraries[0].Segments.Count() - 1 stops · @Model.SelectedFlight.Itineraries[0].Duration</p>
+
+            @foreach (var segment in Model.SelectedFlight.Itineraries[0].Segments)
+            {
+                <div style="margin-bottom: 20px;">
+                    <p>@segment.Departure.At.ToString("ddd d MMM") · @segment.Departure.At.ToString("HH:mm")</p>
+                    <p>@segment.Departure.IataCode · @segment.Departure.Terminal</p>
+
+                    <p>@segment.Arrival.At.ToString("ddd d MMM") · @segment.Arrival.At.ToString("HH:mm")</p>
+                    <p>@segment.Arrival.IataCode · @segment.Arrival.Terminal</p>
+
+                    <p>@segment.CarrierCode</p>
+                    <p>@segment.CarrierCode</p>
+                    <p>@segment.Number · Economy</p>
+
+                    <p>Flight time @segment.Duration</p>
+
+                    @if (segment != Model.SelectedFlight.Itineraries[0].Segments.Last())
+                    {
+                        var nextSegment = Model.SelectedFlight.Itineraries[0].Segments.ElementAt(Model.SelectedFlight.Itineraries[0].Segments.IndexOf(segment) + 1);
+                        var layoverDuration = nextSegment.Departure.At - segment.Arrival.At;
+                        <p>Layover @layoverDuration.Hours hours @layoverDuration.Minutes minutes</p>
+                    }
+                </div>
+            }
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <h4>Return</h4>
+            <p>@Model.SelectedFlight.Itineraries[1].Segments.Count() - 1 stops · @Model.SelectedFlight.Itineraries[1].Duration</p>
+
+            @foreach (var segment in Model.SelectedFlight.Itineraries[1].Segments)
+            {
+                <div style="margin-bottom: 20px;">
+                    <p>@segment.Departure.At.ToString("ddd d MMM") · @segment.Departure.At.ToString("HH:mm")</p>
+                    <p>@segment.Departure.IataCode · @segment.Departure.Terminal</p>
+
+                    <p>@segment.Arrival.At.ToString("ddd d MMM") · @segment.Arrival.At.ToString("HH:mm")</p>
+                    <p>@segment.Arrival.IataCode · @segment.Arrival.Terminal</p>
+
+                    <p>@segment.CarrierCode</p>
+                    <p>@segment.CarrierCode</p>
+                    <p>@segment.Number · Economy</p>
+
+                    <p>Flight time @segment.Duration</p>
+
+                    @if (segment != Model.SelectedFlight.Itineraries[1].Segments.Last())
+                    {
+                        var nextSegment = Model.SelectedFlight.Itineraries[1].Segments.ElementAt(Model.SelectedFlight.Itineraries[1].Segments.IndexOf(segment) + 1);
+                        var layoverDuration = nextSegment.Departure.At - segment.Arrival.At;
+                        <p>Layover @layoverDuration.Hours hours @layoverDuration.Minutes minutes</p>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+}

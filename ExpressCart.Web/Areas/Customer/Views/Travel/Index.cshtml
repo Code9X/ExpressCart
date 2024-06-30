@@ -40,7 +40,7 @@
                     </div>
                     <div style="margin-top:-50px" class="form-group d-inline-flex align-items-center">
                         <label for="MaxCountInput" class="mr-2">Show :</label>
-                        <input style="width:70px;height:25px;" type="number" id="MaxCountInput" asp-for="MaxCount" class="form-control d-inline" min="0" value="10" />
+                        <input style="width:70px;height:25px;" type="number" id="MaxCountInput" asp-for="MaxCount" class="form-control d-inline" min="0" value="100" />
                     </div>
 
                 </div>
@@ -89,14 +89,15 @@
                     </div>
                     <div style="margin-left:30px" class="form-group">
                         <label for="MaxPriceInput">Max. Price:</label>
-                        <input style="width: 120px;" type="number" id="MaxPriceInput" asp-for="MaxPrice" class="form-control" min="0" />
+                        <input style="width: 120px;" type="number" id="MaxPriceInput" asp-for="MaxPrice" class="form-control" min="0" value="100000" />
                     </div>
                     <div style="margin-left: 50px;" class="form-group">
                         <label for="classDropdown">Class:</label>
                         <select style="width: 150px;" id="classDropdown" asp-for="Class" class="form-control">
                             <option value="ECONOMY">ECONOMY</option>
-                            <option value="Premium Economy">Premium Economy</option>
-                            <option value="Business">Business</option>
+                            <option value="PREMIUM_ECONOMY">Premium Economy</option>
+                            <option value="BUSINESS">Business</option>
+                            <option value="FIRST">First Class</option>
                         </select>
                     </div>
                     <div style="margin-top:-70px;margin-left: 962px;" class="form-group">

@@ -1,5 +1,6 @@
 ﻿using System.Drawing.Text;
 using System.Net.Http.Headers;
+using System.Security.Authentication;
 using System.Security.Claims;
 using System.Text.Json;
 using ExpressCart.DataAccess.Repository;
@@ -18,7 +19,7 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
 {
     [Authorize]
     [Area("Customer")]
-    public class TravelController : Controller
+    public class TravelController : Controller //Here i have ignored the SSL Certificate for Testing, change that in Production
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAPIRepository _apiRepository;
@@ -53,9 +54,9 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
         [HttpPost]
         public async Task<IActionResult> Index(TravelVM travelvm)
         {
-            var root = await GetFlightDetailsAsync(travelvm);
+			var root = await GetFlightDetailsAsync(travelvm);
 
-            if (root.Dictionaries?.Carriers != null && root.Dictionaries?.Aircraft != null)
+			if (root.Dictionaries?.Carriers != null && root.Dictionaries?.Aircraft != null)
             {
                 foreach (var flight in root.data)
                 {
@@ -82,12 +83,6 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
 
             return RedirectToAction("FlightOverview");
         }
-        [HttpGet]
-        public async Task<IActionResult> GetAirportDetails(string keyword)
-        {
-            var airportDetails = await GetAirportDtlsAsync(keyword);
-            return Json(airportDetails);
-        }
         public IActionResult FlightOverview()
         {
             var travelvmJson = HttpContext.Session.GetString("travelvm");
@@ -95,10 +90,38 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
             {
                 return RedirectToAction("Index");
             }
-
             var travelvm = JsonConvert.DeserializeObject<TravelVM>(travelvmJson);
 
             return View(travelvm);
+        }
+        [HttpPost]
+        public IActionResult FlightDetails(string flightId)
+        {
+            var travelvmJson = HttpContext.Session.GetString("travelvm");
+            if (string.IsNullOrEmpty(travelvmJson))
+            {
+                // Handle the case where the session data is not available
+                return RedirectToAction("Index");
+            }
+
+            var travelvm = JsonConvert.DeserializeObject<TravelVM>(travelvmJson);
+            var flightDetail = travelvm.FlightDetails.FirstOrDefault(f => f.Id == flightId);
+
+            if (flightDetail == null)
+            {
+                // Handle the case where the flight detail is not found
+                return RedirectToAction("FlightOverview");
+            }
+
+            travelvm.SelectedFlight = flightDetail;
+
+            return View(travelvm);
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetAirportDetails(string keyword)
+        {
+            var airportDetails = await GetAirportDtlsAsync(keyword);
+            return Json(airportDetails);
         }
         private async Task<List<CityAndAirport>> GetAirportDtlsAsync(string keyword)
         {
@@ -106,46 +129,51 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
             string accessToken = await GetAccessTokenAsync();
             string formattedUrl = GetFormattedURL(baseUrl, Keyword: keyword);
 
-            using (var client = new HttpClient())
+            using (var handler = new HttpClientHandler())
             {
-                client.DefaultRequestHeaders.Clear();
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+                handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true; // Ignore SSL certificate errors for testing purposes
 
-                HttpResponseMessage response = await client.GetAsync(formattedUrl);
-
-                if (response.IsSuccessStatusCode)
+                using (var client = new HttpClient(handler))
                 {
-                    string json = await response.Content.ReadAsStringAsync();
-                    dynamic result = JsonConvert.DeserializeObject<dynamic>(json);
+                    client.DefaultRequestHeaders.Clear();
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-                    var cityAndAirports = new List<CityAndAirport>();
+                    HttpResponseMessage response = await client.GetAsync(formattedUrl);
 
-                    if (result.data != null)
+                    if (response.IsSuccessStatusCode)
                     {
-                        foreach (var item in result.data)
+                        string json = await response.Content.ReadAsStringAsync();
+                        dynamic result = JsonConvert.DeserializeObject<dynamic>(json);
+
+                        var cityAndAirports = new List<CityAndAirport>();
+
+                        if (result.data != null)
                         {
-                            cityAndAirports.Add(new CityAndAirport
+                            foreach (var item in result.data)
                             {
-                                Code = item.iataCode,
-                                Name = item.address.cityName,
-                                DetailedName = item.detailedName
-                            });
+                                cityAndAirports.Add(new CityAndAirport
+                                {
+                                    Code = item.iataCode,
+                                    Name = item.address.cityName,
+                                    DetailedName = item.detailedName
+                                });
+                            }
                         }
+                        else
+                        {
+                            TempData["success"] = "No matching locations found.";
+                        }
+
+                        return cityAndAirports;
                     }
                     else
                     {
-                        TempData["success"] = "No matching locations found.";
+                        string message = response.StatusCode.ToString();
+                        TempData["success"] = message;
                     }
 
-                    return cityAndAirports;
+                    return new List<CityAndAirport>();
                 }
-                else
-                {
-                    string message = response.StatusCode.ToString();
-                    TempData["success"] = message;
-                }
-
-                return new List<CityAndAirport>();
             }
         }
         private async Task<Root> GetFlightDetailsAsync(TravelVM travelvm)
@@ -155,27 +183,32 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
 
             string formattedUrl = GetFormattedURL(baseUrl, Travelvm:travelvm);
 
-            using (var client = new HttpClient())
+            using (var handler = new HttpClientHandler())
             {
-                client.DefaultRequestHeaders.Clear();
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+                handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true; // Ignore SSL certificate errors for testing purposes
 
-                HttpResponseMessage response = await client.GetAsync(formattedUrl);
-
-                if (response.IsSuccessStatusCode)
+                using (var client = new HttpClient(handler))
                 {
-                    string json = await response.Content.ReadAsStringAsync();
-                    var root = JsonConvert.DeserializeObject<Root>(json);
+                    client.DefaultRequestHeaders.Clear();
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-                    return root;
-                }
-                else
-                {
-                    string message = response.StatusCode.ToString();
-                    TempData["success"] = message;
-                }
+                    HttpResponseMessage response = await client.GetAsync(formattedUrl);
 
-                return new Root();
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string json = await response.Content.ReadAsStringAsync();
+                        var root = JsonConvert.DeserializeObject<Root>(json);
+
+                        return root;
+                    }
+                    else
+                    {
+                        string message = response.StatusCode.ToString();
+                        TempData["success"] = message;
+                    }
+
+                    return new Root();
+                }
             }
         }
         private async Task<string> GetAccessTokenAsync()
@@ -184,26 +217,43 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
             string clientSecret = _apiRepository.GetFlightAPISecret();
             string tokenUrl = "https://test.api.amadeus.com/v1/security/oauth2/token";
 
-            using (var client = new HttpClient())
+            using (var handler = new HttpClientHandler())
             {
-                var content = new FormUrlEncodedContent(new[]
-                {
-                    new KeyValuePair<string, string>("grant_type", "client_credentials"),
-                    new KeyValuePair<string, string>("client_id", clientId),
-                    new KeyValuePair<string, string>("client_secret", clientSecret)
-                });
+                // Ignore SSL certificate errors for testing purposes
+                handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
 
-                HttpResponseMessage response = await client.PostAsync(tokenUrl, content);
+                using (var client = new HttpClient(handler))
+                {
+                    // Add headers that Postman might be including
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    client.DefaultRequestHeaders.UserAgent.TryParseAdd("PostmanRuntime/7.26.8");
 
-                if (response.IsSuccessStatusCode)
-                {
-                    string json = await response.Content.ReadAsStringAsync();
-                    var tokenResponse = JsonConvert.DeserializeObject<TokenResponse>(json);
-                    return tokenResponse.AccessToken;
-                }
-                else
-                {
-                    throw new Exception("Unable to retrieve access token.");
+                    var content = new FormUrlEncodedContent(new[]
+                    {
+                new KeyValuePair<string, string>("grant_type", "client_credentials"),
+                new KeyValuePair<string, string>("client_id", clientId),
+                new KeyValuePair<string, string>("client_secret", clientSecret)
+            });
+
+                    try
+                    {
+                        HttpResponseMessage response = await client.PostAsync(tokenUrl, content);
+                        string responseContent = await response.Content.ReadAsStringAsync();
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var tokenResponse = JsonConvert.DeserializeObject<TokenResponse>(responseContent);
+                            return tokenResponse.AccessToken;
+                        }
+                        else
+                        {
+                            throw new Exception($"Unable to retrieve access token. Response: {responseContent}");
+                        }
+                    }
+                    catch (HttpRequestException e)
+                    {
+                        throw new Exception($"Request exception: {e.Message}", e);
+                    }
                 }
             }
         }
@@ -262,7 +312,5 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
                 throw new ArgumentException("Either travelvm or Keyword must be provided");
             }
         }
-
-
     }
 }
