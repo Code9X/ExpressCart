@@ -49,16 +49,16 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="fromInput">From:</label>
-                        <input asp-for="Travel.DepLoc" type=" text" id="fromInput" class="form-control" placeholder="Where From?" onkeyup="fetchAirportDetails('from')">
-                        <select style="width: 350px;" id="fromDropdown" class="form-control">
+                        <input asp-for="Travel.DepLoc" type="text" id="fromInput" class="form-control" placeholder="Where From?" onkeyup="fetchAirportDetails('from')" onclick="fetchAirportDetails('from')">
+                        <select style="width: 350px;" id="fromDropdown" class="form-control" onclick="fetchAirportDetails('from')">
                             <option value="" disabled selected>Select a location</option>
                         </select>
                     </div>
                     <h3 style="margin-top:45px;margin-left:20px">⇄</h3>
                     <div style="margin-left:30px" class="form-group">
                         <label for="toInput">To:</label>
-                        <input asp-for="Travel.DestLoc" type="text" id="toInput" class="form-control" placeholder="Where To?" onkeyup="fetchAirportDetails('to')">
-                        <select style="width: 350px;" id="toDropdown" class="form-control">
+                        <input asp-for="Travel.DestLoc" type="text" id="toInput" class="form-control" placeholder="Where To?" onkeyup="fetchAirportDetails('to')" onclick="fetchAirportDetails('to')">
+                        <select style="width: 350px;" id="toDropdown" class="form-control" onclick="fetchAirportDetails('to')">
                             <option value="" disabled selected>Select a location</option>
                         </select>
                     </div>
@@ -163,32 +163,53 @@
             const keywordInput = type === 'from' ? document.getElementById("fromInput") : document.getElementById("toInput");
             const dropdown = type === 'from' ? document.getElementById("fromDropdown") : document.getElementById("toDropdown");
 
-            const keyword = keywordInput.value.trim();
+            let keyword = keywordInput.value.trim();
 
-            if (keyword.length > 0) {
+            if (keyword.length === 0) {
+                keyword = "A"; // Default keyword if no input is provided
+            }
+
+            try {
                 const response = await fetch(`/Customer/Travel/GetAirportDetails?keyword=${keyword}`);
                 if (response.ok) {
                     const data = await response.json();
 
-                    dropdown.innerHTML = '<option value="" disabled selected>Select a location</option>';
+                    // Preserve the default option while updating dropdown
+                    const defaultOption = dropdown.querySelector('option[value=""]');
+                    dropdown.innerHTML = ''; // Clear existing options
 
+                    // Add default option back
+                    dropdown.appendChild(defaultOption);
+
+                    // Add fetched data options
                     data.forEach(airport => {
                         const option = document.createElement("option");
                         option.value = airport.code;
-                        option.textContent = `${airport.name} (${airport.detailedName})`; 
+                        option.textContent = `${airport.name} (${airport.detailedName})`;
                         dropdown.appendChild(option);
                     });
 
+                    // Event listener for dropdown change
                     dropdown.addEventListener('change', function () {
                         const selectedOption = this.options[this.selectedIndex];
-                        keywordInput.value = selectedOption.value; // Use value instead of text
+                        keywordInput.value = selectedOption.value; // Populate input with airport code
+                    });
+
+                    // Event listener for dropdown click (to immediately populate input)
+                    dropdown.addEventListener('click', function (event) {
+                        if (event.target.tagName === 'OPTION' && event.target.value !== '') {
+                            keywordInput.value = event.target.value; // Populate input with airport code
+                        }
                     });
 
                 } else {
                     console.error("Failed to fetch airport details");
                 }
+            } catch (error) {
+                console.error("Error fetching airport details:", error);
             }
         }
+
     </script>
 </body>
 </html>
