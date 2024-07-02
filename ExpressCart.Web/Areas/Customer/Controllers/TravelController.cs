@@ -7,6 +7,7 @@ using ExpressCart.DataAccess.Repository;
 using ExpressCart.DataAccess.Repository.IRepository;
 using ExpressCart.Models;
 using ExpressCart.Models.ViewModels;
+using ExpressCart.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -121,7 +122,7 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
             return View(travelvm);
         }
         [HttpPost]
-        public IActionResult FlightPayment()
+        public IActionResult FlightPayment() //Here Total * 100 is been given, and then limit exceeded in the razor Pay, so i have changed * 100
         {
             var flightId = TempData["flightId"] as string;
             var travelvmJson = HttpContext.Session.GetString("travelvm");
@@ -150,41 +151,50 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
 
             _unitOfWork.Travel.Add(travelData);
             _unitOfWork.Save();
-             
-            //// Generate Razorpay order
-            //string secretKey = _apiRepository.GetRazorSecretKey();
-            //string publishableKey = _apiRepository.GetRazorPublishableKey();
-             
-            //RazorpayClient client = new RazorpayClient(secretKey, publishableKey);
-            //Dictionary<string, object> options = new Dictionary<string, object>();
-            //options.Add("amount", 100);
-            //options.Add("receipt", "order_rcptid_" + DateTime.Now.ToString("yyyyMMddHHmmss"));
-            //options.Add("currency", "INR");
-            //options.Add("payment_capture", "1"); // 1 - automatic  , 0 - manual
 
-            //Order orderResponse = client.Order.Create(options);
-            //string razorOrderId = orderResponse["id"].ToString();
+            // Generate Razorpay order
+            string secretKey = _apiRepository.GetRazorSecretKey();
+            string publishableKey = _apiRepository.GetRazorPublishableKey();
 
-            //// Create RazorOrder model for return to the view
-            //RazorOrder razorOrder = new RazorOrder
-            //{
-            //    orderId = razorOrderId,
-            //    razorpayKey = secretKey,
-            //    amount = 100,
-            //    currency = "INR",
-            //    name = "Test",
-            //    email = "Test@gmail.com",
-            //    contactNumber = "99993449343",
-            //    address = "Test Address",
-            //    description = "Test Mode"
-            //};
+            decimal grandTotalDecimal = decimal.Parse(flightDetail.Price.GrandTotal);
+            int GrandTotal = (int)Math.Round(grandTotalDecimal);
 
-            ////_unitOfWork.Save();
-            //// Store razorOrder in TempData
-            //TempData["RazorOrder"] = JsonConvert.SerializeObject(razorOrder);
+            RazorpayClient client = new RazorpayClient(secretKey, publishableKey);
+            Dictionary<string, object> options = new Dictionary<string, object>();  
+            options.Add("amount", GrandTotal);
+            options.Add("receipt", "order_rcptid_" + DateTime.Now.ToString("yyyyMMddHHmmss"));
+            options.Add("currency", flightDetail.Price.Currency);
+            options.Add("payment_capture", "1"); // 1 - automatic  , 0 - manual
 
-            //// Redirect to PaymentPage action in HomeController
-            return RedirectToAction("index");
+            Order orderResponse = client.Order.Create(options);
+            string razorOrderId = orderResponse["id"].ToString();
+
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var email = claimsIdentity.FindFirst(ClaimTypes.Email)?.Value;
+            var name = claimsIdentity.FindFirst(ClaimTypes.Name)?.Value;
+            var StreetAddress = claimsIdentity.FindFirst(ClaimTypes.StreetAddress)?.Value;
+
+            // Create RazorOrder model for return to the view
+            RazorOrder razorOrder = new RazorOrder
+            {
+                orderId = razorOrderId,
+                razorpayKey = secretKey,
+                amount = GrandTotal,
+                currency = flightDetail.Price.Currency,
+                name = name,
+                email = email,
+                //contactNumber = "99993449343",
+                address = StreetAddress,
+                description = "Test Mode"
+            };
+
+            TempData["RazorOrder"] = JsonConvert.SerializeObject(razorOrder);
+
+            return View("FlightPayment", Tuple.Create(razorOrder, travelData.Id));
+        }
+        public IActionResult OrderConfirmation(int Id, string paymentStatus, string paymentId)
+        {
+            return View();
         }
         [HttpGet]
         public async Task<IActionResult> GetAirportDetails(string keyword)

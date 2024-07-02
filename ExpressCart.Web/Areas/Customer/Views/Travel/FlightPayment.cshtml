@@ -78,7 +78,7 @@
             var orderId = @Json.Serialize(Model.Item2);
             var paymentId = response.razorpay_payment_id;
 
-            window.location.href = '/Customer/Home/OrderConfirmation?Id=' + orderId + '&paymentStatus=' + paymentStatus + '&paymentId=' + paymentId;
+            window.location.href = '/Customer/Travel/OrderConfirmation?Id=' + orderId + '&paymentStatus=' + paymentStatus + '&paymentId=' + paymentId;
         },
         "prefill": {
             "name": "@Html.DisplayFor(model => model.Item1.name)",
@@ -97,7 +97,7 @@
                 var paymentStatus = 'pending';
                 var paymentId = null;
 
-                window.location.href = '/Customer/Home/OrderConfirmation?Id=' + orderId + '&paymentStatus=' + paymentStatus + '&paymentId=' + paymentId;
+                window.location.href = '/Customer/Travel/OrderConfirmation?Id=' + orderId + '&paymentStatus=' + paymentStatus + '&paymentId=' + paymentId;
             }
         }
     };
