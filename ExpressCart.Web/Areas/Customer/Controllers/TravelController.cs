@@ -52,6 +52,7 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
                 Travel = new Travel()
             };
 
+            Logging.LogAction(nameof(TravelController), "Travel Index Action.", GetUserId());
             return View(travelvm);
         }
         [HttpPost]
@@ -83,6 +84,7 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
             travelvm.FlightDetails = root.data;
 
             HttpContext.Session.SetString("travelvm", JsonConvert.SerializeObject(travelvm));
+            Logging.LogAction(nameof(TravelController), "Travel Index Post Action.", GetUserId());
 
             return RedirectToAction("FlightOverview");
         }
@@ -94,6 +96,7 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
                 return RedirectToAction("Index");
             }
             var travelvm = JsonConvert.DeserializeObject<TravelVM>(travelvmJson);
+            Logging.LogAction(nameof(TravelController), "Travel Flight Overview.", GetUserId());
 
             return View(travelvm);
         }
@@ -118,6 +121,7 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
 
             travelvm.SelectedFlight = flightDetail;
             TempData["flightId"] = flightId;
+            Logging.LogAction(nameof(TravelController), "Travel Flight Details.", GetUserId());
 
             return View(travelvm);
         }
@@ -189,11 +193,14 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
             };
 
             TempData["RazorOrder"] = JsonConvert.SerializeObject(razorOrder);
+            Logging.LogAction(nameof(TravelController), "Travel Flight Payment", GetUserId());
 
             return View("FlightPayment", Tuple.Create(razorOrder, travelData.Id));
         }
         public IActionResult OrderConfirmation(int Id, string paymentStatus, string paymentId)
         {
+            Logging.LogAction(nameof(TravelController), "Travel Order Confirmation", GetUserId());
+
             return View();
         }
         [HttpGet]
