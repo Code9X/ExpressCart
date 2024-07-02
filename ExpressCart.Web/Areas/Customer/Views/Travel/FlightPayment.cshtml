@@ -75,10 +75,10 @@
             document.getElementById('rzp_orderid').value = response.razorpay_order_id;
 
 
-            var orderId = @Json.Serialize(Model.Item2);
+            var bookingId = @Json.Serialize(Model.Item2);
             var paymentId = response.razorpay_payment_id;
 
-            window.location.href = '/Customer/Travel/OrderConfirmation?Id=' + orderId + '&paymentStatus=' + paymentStatus + '&paymentId=' + paymentId;
+            window.location.href = '/Customer/Travel/OrderConfirmation?Id=' + bookingId + '&paymentStatus=' + paymentStatus + '&paymentId=' + paymentId;
         },
         "prefill": {
             "name": "@Html.DisplayFor(model => model.Item1.name)",
@@ -93,11 +93,11 @@
         },
         "modal": {
             ondismiss: function () {
-                var orderId = @Json.Serialize(Model.Item2);
+                var bookingId = @Json.Serialize(Model.Item2);
                 var paymentStatus = 'pending';
                 var paymentId = null;
 
-                window.location.href = '/Customer/Travel/OrderConfirmation?Id=' + orderId + '&paymentStatus=' + paymentStatus + '&paymentId=' + paymentId;
+                window.location.href = '/Customer/Travel/OrderConfirmation?Id=' + bookingId + '&paymentStatus=' + paymentStatus + '&paymentId=' + paymentId;
             }
         }
     };

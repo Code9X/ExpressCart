@@ -148,7 +148,7 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
                 CarrierName = flightDetail.CarrierName,
                 AircraftName = flightDetail.AircraftName,
                 Code = flightDetail.Itineraries[0].Segments[0].Aircraft.Code,
-                OneWay = flightDetail.OneWay,
+                OneWay = travelvm.Travel.OneWay,
                 BasePrice = flightDetail.Price.Currency + " " + flightDetail.Price.Base,
                 TotalPrice = flightDetail.Price.Currency + " " + flightDetail.Price.GrandTotal
             };
@@ -194,14 +194,46 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
 
             TempData["RazorOrder"] = JsonConvert.SerializeObject(razorOrder);
             Logging.LogAction(nameof(TravelController), "Travel Flight Payment", GetUserId());
+            TempData["flightId"] = flightId;
 
+            _unitOfWork.Save();
             return View("FlightPayment", Tuple.Create(razorOrder, travelData.Id));
         }
         public IActionResult OrderConfirmation(int Id, string paymentStatus, string paymentId)
         {
-            Logging.LogAction(nameof(TravelController), "Travel Order Confirmation", GetUserId());
+            Travel travel = _unitOfWork.Travel.Get(u => u.Id == Id);
 
-            return View();
+            if (paymentStatus == "paid")
+            {
+                travel.TicketNo = $"{DateTime.Now:yyyyMMdd}" + Id;
+                travel.PaymentStatus = SD.PaymentStatusApproved;
+                travel.PaymentIntentId = paymentId;
+                travel.PaymentDate = DateTime.Now.ToString();
+                travel.BookCancelledYN = false;
+
+                _unitOfWork.Travel.Update(travel);
+                _unitOfWork.Save();
+
+                ViewBag.Id = Id;
+                ViewBag.PaymentId = paymentId;
+
+                Logging.LogAction(nameof(TravelController), "Booking Confirmation page visited.", GetUserId());
+                return View();
+            }
+            else
+            {
+                travel.TicketNo = $"{DateTime.Now:yyyyMMdd}" + Id;
+                travel.PaymentStatus = SD.PaymentStatusPending;
+                travel.PaymentIntentId = null;
+                travel.PaymentDate = null;
+                travel.BookCancelledYN = true;
+
+                _unitOfWork.Travel.Update(travel);
+                _unitOfWork.Save();
+
+                Logging.LogAction(nameof(TravelController), "Booking Cancelled page visited.", GetUserId());
+                return View("OrderCancelled");
+            }
         }
         [HttpGet]
         public async Task<IActionResult> GetAirportDetails(string keyword)

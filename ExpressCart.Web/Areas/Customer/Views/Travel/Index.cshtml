@@ -30,13 +30,14 @@
                 <div class="form-group form-inline-group">
                     <div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="TripType" value="OneWay" checked onclick="toggleReturnDate(false)" />
+                            <input class="form-check-input" type="radio" name="TripType" value="OneWay" checked onclick="document.getElementById('OneWay').value = true; toggleReturnDate(false)" />
                             <label class="form-check-label">One Way</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="TripType" value="RoundTrip" onclick="toggleReturnDate(true)" />
+                            <input class="form-check-input" type="radio" name="TripType" value="RoundTrip" onclick="document.getElementById('OneWay').value = false; toggleReturnDate(true)" />
                             <label class="form-check-label">Round Trip</label>
                         </div>
+                        <input type="hidden" id="OneWay" name="Travel.OneWay" value="true" />
                     </div>
                     <div style="margin-top:-50px" class="form-group d-inline-flex align-items-center">
                         <label for="MaxCountInput" class="mr-2">Show :</label>
