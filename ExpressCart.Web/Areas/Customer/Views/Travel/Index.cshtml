@@ -48,7 +48,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="fromInput">From:</label>
-                        <input asp-for="Travel.DepartureLocation" type=" text" id="fromInput" class="form-control" placeholder="Where From?" onkeyup="fetchAirportDetails('from')">
+                        <input asp-for="Travel.DepLoc" type=" text" id="fromInput" class="form-control" placeholder="Where From?" onkeyup="fetchAirportDetails('from')">
                         <select style="width: 350px;" id="fromDropdown" class="form-control">
                             <option value="" disabled selected>Select a location</option>
                         </select>
@@ -56,29 +56,29 @@
                     <h3 style="margin-top:45px;margin-left:20px">⇄</h3>
                     <div style="margin-left:30px" class="form-group">
                         <label for="toInput">To:</label>
-                        <input asp-for="Travel.DestinationLocation" type="text" id="toInput" class="form-control" placeholder="Where To?" onkeyup="fetchAirportDetails('to')">
+                        <input asp-for="Travel.DestLoc" type="text" id="toInput" class="form-control" placeholder="Where To?" onkeyup="fetchAirportDetails('to')">
                         <select style="width: 350px;" id="toDropdown" class="form-control">
                             <option value="" disabled selected>Select a location</option>
                         </select>
                     </div>
                     <div style="margin-left:30px;" class="form-group">
                         <label for="adultsInput">Adults:</label>
-                        <input style="width: 100px;" type="number" asp-for="Travel.Adults_count" class="form-control" id="adultsInput" name="Travel.Adults_count" min="0" value="1" />
+                        <input style="width: 100px;" type="number" asp-for="Travel.Adults" class="form-control" id="adultsInput" name="Travel.Adults" min="0" value="1" />
                     </div>
                     <div style="margin-left:30px" class="form-group">
                         <label for="childrenInput">Children:</label>
-                        <input style="width: 100px;" type="number" asp-for="Travel.Childerns_count" class="form-control" id="childrenInput" name="Travel.Childerns_count" min="0" />
+                        <input style="width: 100px;" type="number" asp-for="Travel.Childerns" class="form-control" id="childrenInput" name="Travel.Childerns" min="0" />
                     </div>
                 </div>
 
                 <div style="margin-top:15px" class="form-row">
                     <div class="form-group">
                         <label for="startDateInput">Depart On:</label>
-                        <input style="width: 220px;" type="date" asp-for="Travel.DepartureDate" class="form-control" id="startDateInput" name="Travel.DepartureDate" />
+                        <input style="width: 220px;" type="date" asp-for="Travel.DepDate" class="form-control" id="startDateInput" name="Travel.DepDate" />
                     </div>
                     <div style="margin-left:30px" class="form-group">
                         <label for="endDateInput">Return On:</label>
-                        <input style="width: 220px;" type="date" asp-for="Travel.DestinationDate" class="form-control" id="returnDateInput" name="Travel.DestinationDate" placeholder="Return On" disabled />
+                        <input style="width: 220px;" type="date" asp-for="Travel.DestDate" class="form-control" id="returnDateInput" name="Travel.DestDate" placeholder="Return On" disabled />
                     </div>
                     <div style="margin-left:30px" class="form-group">
                         <label for="CurrencyCodeDropdown">Currency :</label>

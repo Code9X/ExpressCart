@@ -8,6 +8,11 @@
     </div>
 </div>
 
+<form asp-controller="Travel" asp-action="FlightPayment" method="post">
+    <div style="margin-top:-90px;margin-left:1000px">
+        <button type="submit" class="btnCheckout">Buy Ticket</button>
+    </div>
+
 @if (Model.SelectedFlight.Itineraries.Count == 1) //One Way Trip
 {
     <div style="text-align: left;">
@@ -157,3 +162,21 @@ else if (Model.SelectedFlight.Itineraries.Count == 2) // Round Trip
         }
     </div>
 }
+</form>
+
+<style>
+    .btnCheckout {
+        border: 2px solid blue;
+        color: white;
+        background-color: blue;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        border-radius: 8px;
+    }
+
+        .btnCheckout:hover {
+            background-color: darkblue;
+        }
+</style>

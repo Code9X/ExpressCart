@@ -10,8 +10,10 @@ using ExpressCart.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Razorpay.Api;
 using Stripe;
 using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 
@@ -114,8 +116,75 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
             }
 
             travelvm.SelectedFlight = flightDetail;
+            TempData["flightId"] = flightId;
 
             return View(travelvm);
+        }
+        [HttpPost]
+        public IActionResult FlightPayment()
+        {
+            var flightId = TempData["flightId"] as string;
+            var travelvmJson = HttpContext.Session.GetString("travelvm");
+            var travelvm = JsonConvert.DeserializeObject<TravelVM>(travelvmJson);
+            var flightDetail = travelvm.FlightDetails.FirstOrDefault(f => f.Id == flightId);
+
+            var travelData = new Travel
+            {
+                UserId = GetUserId(),
+                DepLoc = flightDetail.Itineraries[0].Segments[0].Departure.IataCode,
+                DepTerm = flightDetail.Itineraries[0].Segments[0].Departure.Terminal,
+                DepDate = flightDetail.Itineraries[0].Segments[0].Departure.At.ToString(),
+                Stops = flightDetail.Itineraries[0].Segments.Count,
+                DestLoc = flightDetail.Itineraries[0].Segments.Max(s => s.Arrival.IataCode),
+                DestTerm = flightDetail.Itineraries[0].Segments.Max(s => s.Arrival.Terminal),
+                DestDate = flightDetail.Itineraries[0].Segments.Max(s => s.Arrival.At.ToString()),
+                Adults = travelvm.Travel.Adults,
+                Childerns = travelvm.Travel.Childerns,
+                CarrierName = flightDetail.CarrierName,
+                AircraftName = flightDetail.AircraftName,
+                Code = flightDetail.Itineraries[0].Segments[0].Aircraft.Code,
+                OneWay = flightDetail.OneWay,
+                BasePrice = flightDetail.Price.Currency + " " + flightDetail.Price.Base,
+                TotalPrice = flightDetail.Price.Currency + " " + flightDetail.Price.GrandTotal
+            };
+
+            _unitOfWork.Travel.Add(travelData);
+            _unitOfWork.Save();
+             
+            //// Generate Razorpay order
+            //string secretKey = _apiRepository.GetRazorSecretKey();
+            //string publishableKey = _apiRepository.GetRazorPublishableKey();
+             
+            //RazorpayClient client = new RazorpayClient(secretKey, publishableKey);
+            //Dictionary<string, object> options = new Dictionary<string, object>();
+            //options.Add("amount", 100);
+            //options.Add("receipt", "order_rcptid_" + DateTime.Now.ToString("yyyyMMddHHmmss"));
+            //options.Add("currency", "INR");
+            //options.Add("payment_capture", "1"); // 1 - automatic  , 0 - manual
+
+            //Order orderResponse = client.Order.Create(options);
+            //string razorOrderId = orderResponse["id"].ToString();
+
+            //// Create RazorOrder model for return to the view
+            //RazorOrder razorOrder = new RazorOrder
+            //{
+            //    orderId = razorOrderId,
+            //    razorpayKey = secretKey,
+            //    amount = 100,
+            //    currency = "INR",
+            //    name = "Test",
+            //    email = "Test@gmail.com",
+            //    contactNumber = "99993449343",
+            //    address = "Test Address",
+            //    description = "Test Mode"
+            //};
+
+            ////_unitOfWork.Save();
+            //// Store razorOrder in TempData
+            //TempData["RazorOrder"] = JsonConvert.SerializeObject(razorOrder);
+
+            //// Redirect to PaymentPage action in HomeController
+            return RedirectToAction("index");
         }
         [HttpGet]
         public async Task<IActionResult> GetAirportDetails(string keyword)
@@ -261,12 +330,12 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
         {
             if (Travelvm != null)
             {
-                var depLoc = Travelvm.Travel.DepartureLocation.ToString();
-                var destLoc = Travelvm.Travel.DestinationLocation.ToString();
-                var depDate = Travelvm.Travel.DepartureDate.ToString("yyyy-MM-dd");
-                var destDate = Travelvm.Travel.DestinationDate.ToString("yyyy-MM-dd");
-                int adults = Travelvm.Travel.Adults_count;
-                int children = Travelvm.Travel.Childerns_count;
+                var depLoc = Travelvm.Travel.DepLoc.ToString();
+                var destLoc = Travelvm.Travel.DestLoc.ToString();
+                var depDate = Travelvm.Travel.DepDate.ToString();
+                var destDate = Travelvm.Travel.DestDate?.ToString() ?? string.Empty;
+                int adults = Travelvm.Travel.Adults;
+                int children = Travelvm.Travel.Childerns;
                 double maxPrice = Travelvm.MaxPrice;
                 int maxCount = Travelvm.MaxCount;
                 var currCode = Travelvm.CurrencyCode.ToString();
@@ -276,7 +345,7 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
                 try
                 {
                     string formattedUrl = string.Empty;
-                    if (destDate == "0001-01-01") // If One Way is Selected
+                    if (destDate == "") // If One Way is Selected
                     {
                         string adjustedBaseUrl = baseUrl.Replace("&children={5}", "");
 
