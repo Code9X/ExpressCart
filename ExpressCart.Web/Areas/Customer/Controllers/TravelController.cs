@@ -58,9 +58,9 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
         [HttpPost]
         public async Task<IActionResult> Index(TravelVM travelvm)
         {
-			var root = await GetFlightDetailsAsync(travelvm);
+            var root = await GetFlightDetailsAsync(travelvm);
 
-			if (root.Dictionaries?.Carriers != null && root.Dictionaries?.Aircraft != null)
+            if (root.Dictionaries?.Carriers != null && root.Dictionaries?.Aircraft != null)
             {
                 foreach (var flight in root.data)
                 {
@@ -126,7 +126,7 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
             return View(travelvm);
         }
         [HttpPost]
-        public IActionResult FlightPayment() //Here Total * 100 is been given, and then limit exceeded in the razor Pay, so i have changed * 100
+        public IActionResult FlightPayment() //Here Total * 100 is been given earlier, and then limit exceeded in the razor Pay, so i have changed * 100
         {
             var flightId = TempData["flightId"] as string;
             var travelvmJson = HttpContext.Session.GetString("travelvm");

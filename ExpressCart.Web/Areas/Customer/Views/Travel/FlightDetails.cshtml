@@ -168,6 +168,40 @@ else if (Model.SelectedFlight.Itineraries.Count == 2) // Round Trip
 }
 </form>
 
+<!-- Loader -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $("form").submit(function () {
+            var showLoader = function () {
+                $("<div />").css({
+                    'position': 'fixed',
+                    'left': '0',
+                    'right': '0',
+                    'bottom': '0',
+                    'top': '0',
+                    'z-index': '9999',
+                    'background': 'rgba(255, 255, 255, 0.7)', // semi-transparent white background
+                    'display': 'flex',
+                    'justify-content': 'center',
+                    'align-items': 'center'
+                }).appendTo($("body"))
+                    .append(
+                        $("<img />").attr({
+                            "src": "https://i.gifer.com/Vp3R.gif",
+                            "width": "200",
+                            "height": "200"
+                        }).css({
+                            'display': 'block',
+                            'margin': 'auto'
+                        })
+                    );
+            };
+            showLoader();
+        });
+    });
+</script>
+
 <style>
     .btnCheckout {
         border: 2px solid blue;
