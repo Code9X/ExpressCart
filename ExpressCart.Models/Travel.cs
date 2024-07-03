@@ -13,10 +13,12 @@ namespace ExpressCart.Models
         public int Id { get; set; }
         public string? TicketNo { get; set; } 
         public string UserId { get; set; }
+        [Required(ErrorMessage = "Departure location is required.")]
         public string DepLoc { get; set; }
         public string DepTerm { get; set; }
         public string DepDate { get; set; }
         public int Stops { get; set; }
+        [Required(ErrorMessage = "Destination location is required.")]
         public string DestLoc { get; set; }
         public string DestTerm { get; set; }
         public string DestDate { get; set; }

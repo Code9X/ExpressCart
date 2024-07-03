@@ -9,26 +9,28 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
     <link rel="stylesheet" href="/css/Travel/Index.css">
     <style>
-        .form-inline-group {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .is-invalid {
+            border-color: red;
+        }
+
+        .validation-summary-errors {
+            color: red;
         }
     </style>
 </head>
 <body>
     <div class="container mt-5">
         <div class="booking-form">
-            <h6 style="margin-top: -50px;">
+            <h6>
                 <a asp-controller="Home" asp-action="Index" style="text-decoration: none; color: deepskyblue;">ExpressCart</a> > @Model.CategoryName.ToUpper()
             </h6>
             <h2>Book Your Trip</h2>
-            <form method="post">
+            <form method="post" id="bookingForm">
                 <input type="hidden" asp-for="Travel.Id" />
                 <input type="hidden" asp-for="CategoryId" />
 
-                <div class="form-group form-inline-group">
-                    <div>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" name="TripType" value="OneWay" checked onclick="document.getElementById('OneWay').value = true; toggleReturnDate(false)" />
                             <label class="form-check-label">One Way</label>
@@ -39,122 +41,151 @@
                         </div>
                         <input type="hidden" id="OneWay" name="Travel.OneWay" value="true" />
                     </div>
-                    <div style="margin-top:-50px" class="form-group d-inline-flex align-items-center">
-                        <label for="MaxCountInput" class="mr-2">Show :</label>
-                        <input style="width:70px;height:25px;" type="number" id="MaxCountInput" asp-for="MaxCount" class="form-control d-inline" min="0" value="100" />
+                    <div class="form-group col-md-6 text-right">
+                        <label for="MaxCountInput" class="mr-2">Show:</label>
+                        <input type="number" id="MaxCountInput" asp-for="MaxCount" class="form-control d-inline-block" style="width: 80px;" min="0" value="100" />
                     </div>
-
                 </div>
 
                 <div class="form-row">
-                    <div class="form-group">
+                    <div class="form-group col-md-6">
                         <label for="fromInput">From:</label>
                         <input asp-for="Travel.DepLoc" type="text" id="fromInput" class="form-control" placeholder="Where From?" onkeyup="fetchAirportDetails('from')" onclick="fetchAirportDetails('from')">
-                        <select style="width: 350px;" id="fromDropdown" class="form-control" onclick="fetchAirportDetails('from')">
+                        <span asp-validation-for="Travel.DepLoc" class="text-danger"></span>
+                        <select id="fromDropdown" class="form-control" onclick="fetchAirportDetails('from')">
                             <option value="" disabled selected>Select a location</option>
                         </select>
                     </div>
-                    <h3 style="margin-top:45px;margin-left:20px">⇄</h3>
-                    <div style="margin-left:30px" class="form-group">
+                    <div class="form-group col-md-6">
                         <label for="toInput">To:</label>
                         <input asp-for="Travel.DestLoc" type="text" id="toInput" class="form-control" placeholder="Where To?" onkeyup="fetchAirportDetails('to')" onclick="fetchAirportDetails('to')">
-                        <select style="width: 350px;" id="toDropdown" class="form-control" onclick="fetchAirportDetails('to')">
+                        <span asp-validation-for="Travel.DestLoc" class="text-danger"></span>
+                        <select id="toDropdown" class="form-control" onclick="fetchAirportDetails('to')">
                             <option value="" disabled selected>Select a location</option>
                         </select>
-                    </div>
-                    <div style="margin-left:30px;" class="form-group">
-                        <label for="adultsInput">Adults:</label>
-                        <input style="width: 100px;" type="number" asp-for="Travel.Adults" class="form-control" id="adultsInput" name="Travel.Adults" min="0" value="1" />
-                    </div>
-                    <div style="margin-left:30px" class="form-group">
-                        <label for="childrenInput">Children:</label>
-                        <input style="width: 100px;" type="number" asp-for="Travel.Childerns" class="form-control" id="childrenInput" name="Travel.Childerns" min="0" />
                     </div>
                 </div>
 
-                <div style="margin-top:15px" class="form-row">
-                    <div class="form-group">
+                <div class="form-row">
+                    <div class="form-group col-md-3">
+                        <label for="adultsInput">Adults:</label>
+                        <input type="number" asp-for="Travel.Adults" class="form-control" id="adultsInput" name="Travel.Adults" min="1" value="1" />
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="childrenInput">Children:</label>
+                        <input type="number" asp-for="Travel.Childerns" class="form-control" id="childrenInput" name="Travel.Childerns" min="0" />
+                    </div>
+                    <div class="form-group col-md-3">
                         <label for="startDateInput">Depart On:</label>
-                        <input style="width: 220px;" type="date" asp-for="Travel.DepDate" class="form-control" id="startDateInput" name="Travel.DepDate" />
+                        <input type="date" asp-for="Travel.DepDate" class="form-control" id="startDateInput" name="Travel.DepDate" />
                     </div>
-                    <div style="margin-left:30px" class="form-group">
+                    <div class="form-group col-md-3">
                         <label for="endDateInput">Return On:</label>
-                        <input style="width: 220px;" type="date" asp-for="Travel.DestDate" class="form-control" id="returnDateInput" name="Travel.DestDate" placeholder="Return On" disabled />
+                        <input type="date" asp-for="Travel.DestDate" class="form-control" id="returnDateInput" name="Travel.DestDate" placeholder="Return On" disabled />
                     </div>
-                    <div style="margin-left:30px" class="form-group">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-3">
                         <label for="CurrencyCodeDropdown">Currency :</label>
-                        <select style="width: 100px;" id="CurrencyCodeDropdown" asp-for="CurrencyCode" class="form-control">
+                        <select id="CurrencyCodeDropdown" asp-for="CurrencyCode" class="form-control">
                             <option value="INR">INR</option>
                             <option value="USD">USD</option>
                         </select>
                     </div>
-                    <div style="margin-left:30px" class="form-group">
+                    <div class="form-group col-md-3">
                         <label for="MaxPriceInput">Max. Price:</label>
-                        <input style="width: 120px;" type="number" id="MaxPriceInput" asp-for="MaxPrice" class="form-control" min="0" value="100000" />
+                        <input type="number" id="MaxPriceInput" asp-for="MaxPrice" class="form-control" min="0" value="100000" />
                     </div>
-                    <div style="margin-left: 50px;" class="form-group">
+                    <div class="form-group col-md-3">
                         <label for="classDropdown">Class:</label>
-                        <select style="width: 150px;" id="classDropdown" asp-for="Class" class="form-control">
+                        <select id="classDropdown" asp-for="Class" class="form-control">
                             <option value="ECONOMY">ECONOMY</option>
                             <option value="PREMIUM_ECONOMY">Premium Economy</option>
                             <option value="BUSINESS">Business</option>
                             <option value="FIRST">First Class</option>
                         </select>
                     </div>
-                    <div style="margin-top:-70px;margin-left: 962px;" class="form-group">
+@*                     <div class="form-group col-md-3">
                         <div class="form-check mt-4">
                             <input type="checkbox" class="form-check-input" asp-for="NonStop" id="nonStopCheck" />
                             <label class="form-check-label" for="nonStopCheck">Non Stop</label>
                         </div>
+                    </div> *@
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-12 text-right">
+                        <button type="submit" class="btn btn-primary">Search for Flights</button>
                     </div>
-                </div>
-
-                <div style="margin-top:15px" class="form-row">
-                </div>
-
-                <div class="submit-btn">
-                    <button type="submit" class="btn btn-primary">Submit</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.2/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
     <script>
         function toggleReturnDate(enable) {
             var returnDateInput = document.getElementById("returnDateInput");
             var startDateInput = document.getElementById("startDateInput");
             if (enable) {
-                // Enable return date and set it to start date + 1 day
                 var nextDay = new Date(startDateInput.value);
                 nextDay.setDate(nextDay.getDate() + 1);
                 returnDateInput.value = nextDay.toISOString().split('T')[0];
                 returnDateInput.disabled = false;
             } else {
-                // Clear and disable return date
                 returnDateInput.value = '';
                 returnDateInput.disabled = true;
             }
         }
 
-        // Check the initial state on page load
         document.addEventListener("DOMContentLoaded", function () {
             var tripType = document.querySelector('input[name="TripType"]:checked').value;
             toggleReturnDate(tripType === "RoundTrip");
 
-            // Set current date for DepartureDate and ensure no past dates are allowed
             var startDateInput = document.getElementById("startDateInput");
             var today = new Date().toISOString().split('T')[0];
             startDateInput.min = today;
             startDateInput.value = today;
 
-            // Ensure ReturnDate is not before DepartureDate
             var returnDateInput = document.getElementById("returnDateInput");
             startDateInput.addEventListener("change", function () {
                 returnDateInput.min = this.value;
                 if (new Date(returnDateInput.value) < new Date(this.value)) {
                     returnDateInput.value = '';
+                }
+            });
+
+            document.querySelector('form').addEventListener('submit', function (event) {
+                var isValid = true;
+                var fromInput = document.getElementById("fromInput");
+                var toInput = document.getElementById("toInput");
+
+                if (!fromInput.value.trim()) {
+                    isValid = false;
+                    fromInput.classList.add("is-invalid");
+                } else {
+                    fromInput.classList.remove("is-invalid");
+                }
+
+                if (!toInput.value.trim()) {
+                    isValid = false;
+                    toInput.classList.add("is-invalid");
+                } else {
+                    toInput.classList.remove("is-invalid");
+                }
+
+                if (!isValid) {
+                    event.preventDefault();
+                    $('.is-invalid').each(function () {
+                        var element = $(this);
+                        setTimeout(function () {
+                            element.removeClass('is-invalid');
+                        }, 2000);
+                    });
                 }
             });
         });
@@ -166,7 +197,7 @@
             let keyword = keywordInput.value.trim();
 
             if (keyword.length === 0) {
-                keyword = "A"; // Default keyword if no input is provided
+                keyword = "A";
             }
 
             try {
@@ -174,14 +205,10 @@
                 if (response.ok) {
                     const data = await response.json();
 
-                    // Preserve the default option while updating dropdown
                     const defaultOption = dropdown.querySelector('option[value=""]');
-                    dropdown.innerHTML = ''; // Clear existing options
-
-                    // Add default option back
+                    dropdown.innerHTML = '';
                     dropdown.appendChild(defaultOption);
 
-                    // Add fetched data options
                     data.forEach(airport => {
                         const option = document.createElement("option");
                         option.value = airport.code;
@@ -189,16 +216,14 @@
                         dropdown.appendChild(option);
                     });
 
-                    // Event listener for dropdown change
                     dropdown.addEventListener('change', function () {
                         const selectedOption = this.options[this.selectedIndex];
-                        keywordInput.value = selectedOption.value; // Populate input with airport code
+                        keywordInput.value = selectedOption.value;
                     });
 
-                    // Event listener for dropdown click (to immediately populate input)
                     dropdown.addEventListener('click', function (event) {
                         if (event.target.tagName === 'OPTION' && event.target.value !== '') {
-                            keywordInput.value = event.target.value; // Populate input with airport code
+                            keywordInput.value = event.target.value;
                         }
                     });
 
@@ -209,7 +234,6 @@
                 console.error("Error fetching airport details:", error);
             }
         }
-
     </script>
 </body>
 </html>

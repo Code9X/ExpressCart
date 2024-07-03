@@ -6,17 +6,36 @@
             var groupedFlights = Model.FlightDetails.GroupBy(flight => flight.Id);
         }
 
-		<!-- Flight Cards -->
-		@if (groupedFlights != null && groupedFlights.Any())
-		{
-        <!-- Filter Card -->
-        <div class="col-lg-3">
+        <!-- Filter Card - takes 3 columns on large screens and 12 columns on smaller screens -->
+        <div class="col-lg-3 col-md-12">
             <div class="filter-card">
-                <span>Filter</span>
+                <h4>Filter</h4>
+                <div class="filter-section">
+                    <h5>Stops</h5>
+                    <div class="checkbox">
+                        <input type="checkbox" id="stops-any">
+                        <label for="stops-any">Any</label>
+                        <span style="margin-left: 30px;" class="integer">(1)</span>
+                    </div>
+                    <div class="checkbox">
+                        <input type="checkbox" id="stops-direct">
+                        <label for="stops-direct">Direct</label>
+                        <span style="margin-left: 16px;" class="integer">(1)</span>
+                    </div>
+                    <br />
+                    <h5>Airlines</h5>
+                    <div class="checkbox">
+                        <input type="checkbox" id="stops-airline">
+                        <label for="stops-airline">Air India</label>
+                    </div>
+                </div>
             </div>
         </div>
 
-            <div class="col-lg-9">
+        <!-- Flight Cards - takes 9 columns on large screens and 12 columns on smaller screens -->
+        <div class="col-lg-9 col-md-12">
+            @if (groupedFlights != null && groupedFlights.Any())
+            {
                 @foreach (var flightGroup in groupedFlights)
                 {
                     <form asp-controller="Travel" asp-action="FlightDetails" method="post">
@@ -41,7 +60,7 @@
                                                     <span class="time">@segment.Departure.At.ToString("HH:mm")</span>
                                                 </div>
                                                 <div class="duration">
-                                                    <span>@segment.Duration</span>
+                                                    <span>@segment.Duration.Replace("PT", "").Replace("H", "h ").Replace("M", "m")</span>
                                                     <span>--------</span>
                                                     <div class="non-stop">
                                                         <span>@(segment.NumberOfStops == 0 ? "Non stop" : "Stop")</span>
@@ -55,7 +74,7 @@
                                         }
                                     }
                                 </div>
-                                <div style="margin-left: 690px;">
+                                <div style="margin-left: auto; margin-top: 10px;"> <!-- Ensure price stays on the right -->
                                     @if (flightGroup.First().Price.Currency == "INR")
                                     {
                                         <p>₹ @flightGroup.First().Price.GrandTotal</p>
@@ -69,87 +88,111 @@
                         </div>
                     </form>
                 }
-            </div>
-        }
-        else
-        {
-            <div class="col-lg-9">
-                <h4>No Flights available at this date. Please select a different date. Thank You!</h4>
-            </div>
-        }
+            }
+            else
+            {
+                <!-- Message for no flights available -->
+                <div class="col-lg-9 col-md-12">
+                    <h4>No Flights available at this date. Please select a different date. Thank You!</h4>
+                </div>
+            }
+        </div>
     </div>
 </div>
 
+<script>
+    $(document).ready(function () {
+        $('#stops-direct').change(function () {
+            var isChecked = $(this).is(':checked');
+
+            $('.flight-card').each(function () {
+                var isDirect = $(this).find('.non-stop span').text().trim() === 'Non stop';
+
+                if (isChecked && !isDirect) {
+                    $(this).hide(); // Hide flights that are not direct
+                } else {
+                    $(this).show(); // Show all flights if checkbox is unchecked or flight is direct
+                }
+            });
+        });
+    });
+</script>
+
 <style>
-	.flight-card {
-		border: 1px solid #ddd;
-		border-radius: 5px;
-		margin: 10px 0;
-		padding: 15px;
-		box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-		display: flex;
-		flex-direction: column;
-		cursor: pointer;
-	}
+    .flight-card {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin: 10px 0;
+        padding: 15px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
 
-	.flight-details {
-		display: flex;
-		flex-direction: column;
-		width: 100%;
-	}
+        .flight-card:hover {
+            background-color: skyblue;
+        }
 
-	.flight-header {
-		display: flex;
-		align-items: center;
-		margin-bottom: 10px;
-	}
+    .flight-details {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
 
-	.flight-info {
-		font-size: 1.25rem;
-		font-weight: bold;
-	}
+    .flight-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
 
-	.flight-schedule {
-		display: flex;
-		justify-content: space-between;
-		margin-bottom: 10px;
-	}
+    .flight-info {
+        font-size: 1.25rem;
+        font-weight: bold;
+    }
 
-	.schedule-item {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-	}
+    .flight-schedule {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
 
-	.iata-code {
-		font-size: 1.2rem;
-		font-weight: bold;
-	}
+    .schedule-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
 
-	.time {
-		font-size: 1rem;
-		color: #555;
-	}
+    .iata-code {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
 
-	.duration {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-	}
+    .time {
+        font-size: 1rem;
+        color: #555;
+    }
 
-	.non-stop span {
-		font-size: 0.9rem;
-		color: #555;
-	}
+    .duration {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
 
-	.flight-meta {
-		margin-top: 10px;
-		font-size: 1rem;
-		line-height: 1.5;
-		text-align: right;
-	}
+    .non-stop span {
+        font-size: 0.9rem;
+        color: #555;
+    }
 
-		.flight-meta p {
-			margin: 5px 0;
-		}
+    .flight-meta {
+        margin-top: 10px;
+        font-size: 1rem;
+        line-height: 1.5;
+        text-align: right;
+    }
+
+    .flight-meta p {
+        margin: 5px 0;
+    }
 </style>

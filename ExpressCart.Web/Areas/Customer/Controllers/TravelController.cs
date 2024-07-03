@@ -139,7 +139,7 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
                 DepLoc = flightDetail.Itineraries[0].Segments[0].Departure.IataCode,
                 DepTerm = flightDetail.Itineraries[0].Segments[0].Departure.Terminal,
                 DepDate = flightDetail.Itineraries[0].Segments[0].Departure.At.ToString(),
-                Stops = flightDetail.Itineraries[0].Segments.Count,
+                Stops = flightDetail.Itineraries[0].Segments.Count - 1,
                 DestLoc = flightDetail.Itineraries[0].Segments.Max(s => s.Arrival.IataCode),
                 DestTerm = flightDetail.Itineraries[0].Segments.Max(s => s.Arrival.Terminal),
                 DestDate = flightDetail.Itineraries[0].Segments.Max(s => s.Arrival.At.ToString()),
