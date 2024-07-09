@@ -43,8 +43,9 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
         public IActionResult Index(string searchTerm)
 		{            
             ViewBag.SearchTerm = searchTerm;
+			_logger.LogInformation("Executing Index action");
 
-            IEnumerable<Product> productsQuery;
+			IEnumerable<Product> productsQuery;
 
 			if (!string.IsNullOrEmpty(searchTerm))
 			{

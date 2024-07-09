@@ -86,6 +86,22 @@
 							</div>
 						</div>
 					</div>
+					<!-- Section to show uploaded images -->
+					<div class="row mt-4">
+						<div class="col-12">
+							<h3 class="text-center">Uploaded Images</h3>
+							<div class="row">
+								@foreach (var image in Model.Product.ProductImages)
+								{
+									<div class="col-3">
+										<div class="card mb-3">
+											<img src="@image" class="card-img-top" alt="Product Image" />
+										</div>
+									</div>
+								}
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 		</form>

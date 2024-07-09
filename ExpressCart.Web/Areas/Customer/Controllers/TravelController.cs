@@ -43,7 +43,7 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
         }
         public async Task<IActionResult> Index(int categoryId)
         {
-            var category = _unitOfWork.Category.Get(u => u.Id == categoryId);
+            var category = _unitOfWork.Category.Get(u => u.Id == categoryId);   
 
             var travelvm = new TravelVM
             {
@@ -126,7 +126,7 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
             return View(travelvm);
         }
         [HttpPost]
-        public IActionResult FlightPayment() //Here Total * 100 is been given earlier, and then limit exceeded in the razor Pay, so i have changed * 100
+        public IActionResult FlightPayment()
         {
             var flightId = TempData["flightId"] as string;
             var travelvmJson = HttpContext.Session.GetString("travelvm");
@@ -160,12 +160,12 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
             string secretKey = _apiRepository.GetRazorSecretKey();
             string publishableKey = _apiRepository.GetRazorPublishableKey();
 
-            decimal grandTotalDecimal = decimal.Parse(flightDetail.Price.GrandTotal);
-            int GrandTotal = (int)Math.Round(grandTotalDecimal);
+            //decimal grandTotalDecimal = decimal.Parse(flightDetail.Price.GrandTotal);
+            //int GrandTotal = (int)Math.Round(grandTotalDecimal);
 
             RazorpayClient client = new RazorpayClient(secretKey, publishableKey);
             Dictionary<string, object> options = new Dictionary<string, object>();  
-            options.Add("amount", GrandTotal);
+            options.Add("amount", flightDetail.Price.GrandTotal * 100);
             options.Add("receipt", "order_rcptid_" + DateTime.Now.ToString("yyyyMMddHHmmss"));
             options.Add("currency", flightDetail.Price.Currency);
             options.Add("payment_capture", "1"); // 1 - automatic  , 0 - manual
@@ -183,7 +183,7 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
             {
                 orderId = razorOrderId,
                 razorpayKey = secretKey,
-                amount = GrandTotal,
+                amount = flightDetail.Price.GrandTotal * 100,
                 currency = flightDetail.Price.Currency,
                 name = name,
                 email = email,
@@ -296,7 +296,7 @@ namespace ExpressCartWeb.Areas.Customer.Controllers
         }
         private async Task<Root> GetFlightDetailsAsync(TravelVM travelvm)
         {
-            string baseUrl = _apiRepository.GetFlightApiUrl();
+			string baseUrl = _apiRepository.GetFlightApiUrl();
             string accessToken = await GetAccessTokenAsync();
 
             string formattedUrl = GetFormattedURL(baseUrl, Travelvm:travelvm);

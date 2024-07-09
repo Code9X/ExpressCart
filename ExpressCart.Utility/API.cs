@@ -17,7 +17,7 @@ namespace ExpressCart.Utility
     public class RazorAPIConfig
     {
         public string SecretKey { get; set; }
-        public string PublishableKey { get; set; }
+        public string? PublishableKey { get; set; }
     }
 
     public class CountryAPIConfig

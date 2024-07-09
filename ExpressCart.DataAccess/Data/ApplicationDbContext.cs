@@ -2,8 +2,6 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using ExpressCart.Models;
-using ExpressCart.Models.ViewModels;
-using ExpressCart.Utility;
 
 namespace ExpressCart.DataAccess.Data
 {

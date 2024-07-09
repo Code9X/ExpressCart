@@ -32,6 +32,6 @@ namespace ExpressCart.Models
         [Range(0, 100, ErrorMessage = "Display Order must be between 1-100")]
         public int? DisplayOrder { get; set; }
         [ValidateNever]
-        public List<ProductImage> ProductImages { get; set; }
+        public List<ProductImage> ProductImages { get; set; } = new List<ProductImage>();
     }
 }

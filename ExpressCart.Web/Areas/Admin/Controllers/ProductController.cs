@@ -62,7 +62,11 @@ namespace ExpressCartWeb.Areas.Admin.Controllers
             {
 				//Update
 				productVM.Product = _unitOfWork.Product.Get(u => u.Id == id);
-                return View(productVM);
+				if (productVM.Product.ProductImages == null)
+				{
+					productVM.Product.ProductImages = new List<ProductImage>(); // Ensure it's initialized
+				}
+				return View(productVM);
             }
         }
         [HttpPost]

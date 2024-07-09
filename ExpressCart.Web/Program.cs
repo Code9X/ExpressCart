@@ -56,22 +56,21 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.File(logFilePath, rollingInterval: RollingInterval.Day)
     .CreateLogger();
 
-//Middleware Pipeline
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+//MIDDLEWARE PIPELINE
+if (!app.Environment.IsDevelopment()) // This middleware handles exceptions and enforces HTTP Strict Transport Security (HSTS) in non-development environments.
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+app.UseHttpsRedirection(); // This middleware redirects HTTP requests to HTTPS.
+app.UseStaticFiles(); // This middleware serves static files such as HTML, CSS, and JavaScript from the wwwroot folder.
+app.UseRouting(); // This middleware adds route matching to the middleware pipeline.
+app.UseAuthentication(); // This middleware adds authentication capabilities to the application.
+app.UseAuthorization(); // This middleware ensures that the user is authorized to access certain resources.
+app.MapRazorPages(); // This middleware maps Razor Pages to routes. 
+app.UseSession(); // This middleware enables session state in the application.
 
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-app.UseRouting();
 StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapRazorPages();
-app.UseSession();
 SeedDataBase();
 
 app.MapControllerRoute(
